@@ -1,0 +1,53 @@
+
+# ==========================================
+# DEPENDENCIAS
+# ==========================================
+
+node_modules/
+frontend/node_modules/
+vendor/
+
+# ==========================================
+# ARCHIVOS COMPILADOS Y GENERADOS
+# ==========================================
+
+dist/
+frontend/dist/
+
+# ==========================================
+# CONFIGURACION PRIVADA DEL BACKEND
+# ==========================================
+
+backend/src/config/config.php
+
+# ==========================================
+# REGISTROS DEL BACKEND
+# ==========================================
+
+backend/logs/*
+!backend/logs/.gitkeep
+
+# ==========================================
+# VARIABLES DE ENTORNO Y CREDENCIALES
+# ==========================================
+
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# ARCHIVOS TEMPORALES Y REGISTROS
+# ==========================================
+
+*.log
+.DS_Store
+Thumbs.db
+
+# Documentación interna del proyecto
+/docs/
+
+# ==========================================
+# CONFIGURACION LOCAL DEL EDITOR
+# ==========================================
+
+.vscode/

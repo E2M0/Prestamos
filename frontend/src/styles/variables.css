@@ -1,0 +1,28 @@
+/* Sistema de diseño: una sola fuente de verdad para colores, radios y medidas. */
+:root {
+  --blanco: #ffffff;
+  --fondo: #f6f7f9;
+  --gris-suave: #f3f4f6;
+  --borde: #e5e7eb;
+  --borde-fuerte: #d1d5db;
+
+  --texto: #1f2937;
+  --texto-suave: #6b7280;
+
+  --esmeralda: #059669;
+  --esmeralda-oscuro: #047857;
+  --esmeralda-suave: #d1fae5;
+  --esmeralda-fondo: #ecfdf5;
+
+  --rojo: #b91c1c;
+  --rojo-suave: #fee2e2;
+
+  --sombra: 0 1px 2px rgba(17, 24, 39, 0.05), 0 1px 3px rgba(17, 24, 39, 0.06);
+  --radio: 12px;
+
+  --ancho-sidebar: 248px;
+  --alto-encabezado: 64px;
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
