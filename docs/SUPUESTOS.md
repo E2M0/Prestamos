@@ -1,0 +1,36 @@
+# Supuestos y decisiones de diseño
+
+El enunciado (sección 10) permite definir libremente las reglas no especificadas, siempre que queden
+documentadas y se apliquen de forma consistente. Estas son las del proyecto hasta ahora.
+
+## Base de datos
+1. **Una persona se registra una sola vez** en `clientes` (documento único). Los roles son relaciones:
+   es cliente si `es_cliente = 1`; es garante si aparece en `clientes_garantes`.
+2. **`id_garante` no está en `clientes`**: se usa solo `clientes_garantes` (con `vigente`) para evitar datos duplicados
+   y conservar el historial de garantes. Un cliente tiene un solo garante vigente.
+3. El documento es único en todo el sistema, sin importar el tipo (cédula, RNC o pasaporte).
+4. Los clientes y préstamos nunca se eliminan: cambian de estado.
+5. Numeración de préstamos y recibos con `SEQUENCE` de SQL Server (sin duplicados).
+
+## Módulo de clientes
+6. **Validación del documento** con expresión regular guardada en `tipos_documento.patron`
+   (la misma en React y en PHP): cédula `000-0000000-0`, RNC `0-00-00000-0`, pasaporte alfanumérico de 6 a 12.
+   Se valida el formato, no el dígito verificador.
+7. Teléfonos con formato `809-000-0000`, máximo 5 por persona y exactamente uno principal.
+8. Correo electrónico opcional (el recibo puede enviarse a un correo digitado manualmente).
+9. Las **tres referencias personales son obligatorias** y los **familiares son opcionales**
+   (el enunciado marca ambos como opcionales en 3.1, pero exige las tres referencias para guardar).
+10. Se exige mayoría de edad (18 años) al cliente y al garante.
+11. Clasificación del cliente: A (Excelente), B (Bueno), C (Regular).
+12. Un cliente con préstamos activos no puede inactivarse.
+13. Un garante inactivo no puede asignarse.
+14. Si se registra como cliente a una persona que ya era garante, se reutiliza su registro (no se duplica)
+    y se reactiva si estaba inactiva.
+15. El garante existente se carga en solo lectura; el botón "Editar datos del garante" permite actualizar
+    el registro de esa persona.
+
+## Reglas financieras (se implementarán en las etapas 6 a 9)
+16. Mora: se cobra **una sola vez por cuota vencida**, como porcentaje del valor de la cuota o como monto fijo.
+17. Límite disponible = límite de crédito − capital pendiente de los préstamos activos del cliente.
+18. Saldo fijo: al saldarse la cuota k se genera la k+1 en la misma transacción del recibo.
+19. Los pagos recibidos del dashboard excluyen los recibos de cancelación por renovación (no entra dinero).

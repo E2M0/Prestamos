@@ -3,6 +3,7 @@ import RutaProtegida from './components/RutaProtegida'
 import LayoutPrincipal from './layouts/LayoutPrincipal'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import Clientes from './pages/Clientes'
 import PaginaPendiente from './pages/PaginaPendiente'
 import NoEncontrada from './pages/NoEncontrada'
 import { NAVEGACION } from './utils/navegacion'
@@ -17,6 +18,7 @@ export default function App() {
       <Route element={<RutaProtegida />}>
         <Route element={<LayoutPrincipal />}>
           <Route index element={<Dashboard />} />
+          <Route path="/clientes" element={<Clientes />} />
           {NAVEGACION.filter((n) => n.etapa).map((n) => (
             <Route key={n.ruta} path={n.ruta} element={<PaginaPendiente modulo={n.titulo} etapa={n.etapa} />} />
           ))}

@@ -4,7 +4,7 @@ import { Banknote, HandCoins, LayoutDashboard, RefreshCw, Tags, Users } from 'lu
 // `etapa` indica en qué etapa del plan se construye el módulo (si existe, aún está pendiente).
 export const NAVEGACION = [
   { ruta: '/', titulo: 'Dashboard', icono: LayoutDashboard },
-  { ruta: '/clientes', titulo: 'Clientes y garantes', icono: Users, etapa: 5 },
+  { ruta: '/clientes', titulo: 'Clientes y garantes', icono: Users },
   { ruta: '/tipos-prestamo', titulo: 'Tipos de préstamo', icono: Tags, etapa: 6 },
   { ruta: '/prestamos', titulo: 'Apertura de préstamos', icono: HandCoins, etapa: 6 },
   { ruta: '/recibos', titulo: 'Recibos de ingreso', icono: Banknote, etapa: 8 },

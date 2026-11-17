@@ -1,53 +1,35 @@
-
-# ==========================================
-# DEPENDENCIAS
-# ==========================================
-
-node_modules/
-frontend/node_modules/
-vendor/
-
-# ==========================================
-# ARCHIVOS COMPILADOS Y GENERADOS
-# ==========================================
-
-dist/
-frontend/dist/
-
-# ==========================================
-# CONFIGURACION PRIVADA DEL BACKEND
-# ==========================================
-
+# ---------- Secretos y configuración local (NUNCA se suben) ----------
+# config.php tiene el servidor SQL y los orígenes permitidos; el repositorio lleva config.example.php
 backend/src/config/config.php
-
-# ==========================================
-# REGISTROS DEL BACKEND
-# ==========================================
-
-backend/logs/*
-!backend/logs/.gitkeep
-
-# ==========================================
-# VARIABLES DE ENTORNO Y CREDENCIALES
-# ==========================================
-
 .env
 .env.*
 !.env.example
 
-# ==========================================
-# ARCHIVOS TEMPORALES Y REGISTROS
-# ==========================================
+# ---------- Registros y archivos generados por el backend ----------
+backend/logs/*
+!backend/logs/.gitkeep
+backend/storage/*
+!backend/storage/.gitkeep
 
+# ---------- Frontend (React + Vite) ----------
+node_modules/
+frontend/dist/
+dist/
+*.local
+*.tsbuildinfo
+.vite/
+coverage/
+
+# ---------- Archivos de trabajo ----------
 *.log
+*.zip
+*.bak
+*.tmp
+~$*
+
+# ---------- Editor y sistema operativo ----------
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
-
-# Documentación interna del proyecto
-/docs/
-
-# ==========================================
-# CONFIGURACION LOCAL DEL EDITOR
-# ==========================================
-
-.vscode/
+desktop.ini

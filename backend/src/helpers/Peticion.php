@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-/** Lectura segura del cuerpo JSON de la petición. */
+/** Lectura segura de la petición: cuerpo JSON y parámetros de la ruta. */
 final class Peticion
 {
     public static function json(): array
@@ -15,5 +15,15 @@ final class Peticion
             throw new ErrorApi('El cuerpo de la petición no es un JSON válido.', 400);
         }
         return $datos;
+    }
+
+    /** Id numérico de la ruta (/api/clientes/{id}); si no es válido responde 404. */
+    public static function id(array $parametros, string $clave = 'id'): int
+    {
+        $valor = (string) ($parametros[$clave] ?? '');
+        if (!preg_match('/^\d{1,9}$/', $valor) || (int) $valor < 1) {
+            throw new ErrorApi('Recurso no encontrado.', 404);
+        }
+        return (int) $valor;
     }
 }

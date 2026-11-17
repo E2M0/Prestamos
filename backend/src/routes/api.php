@@ -19,3 +19,12 @@ $router->get('/api/auth/yo',      [AuthController::class, 'yo']);
 
 // Dashboard (Etapa 4)
 $router->get('/api/dashboard', [DashboardController::class, 'resumen']);
+
+// Clientes y garantes (Etapa 5)
+$router->get('/api/catalogos/clientes',    [CatalogoController::class, 'clientes']);
+$router->get('/api/personas/buscar',       [ClienteController::class, 'buscarPersona']);
+$router->get('/api/clientes',              [ClienteController::class, 'listar']);
+$router->post('/api/clientes',             [ClienteController::class, 'crear']);
+$router->get('/api/clientes/{id}',         [ClienteController::class, 'obtener']);
+$router->put('/api/clientes/{id}',         [ClienteController::class, 'actualizar']);
+$router->patch('/api/clientes/{id}/estado', [ClienteController::class, 'cambiarEstado']);
