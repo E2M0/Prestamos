@@ -11,8 +11,8 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | 3 | Entorno y comunicación React ↔ PHP ↔ SQL Server | Probado |
 | 4 | Layout, login, rutas, dashboard, componentes | Probado (dashboard cuadra con los datos de prueba) |
 | 5 | Clientes y garantes | Probado |
-| 6 | Tipos de préstamo y formulario de apertura | Entregado |
-| 7 | Cálculos de amortización, tabla virtual y guardado del préstamo | Pendiente |
+| 6 | Tipos de préstamo y formulario de apertura | Entregado (probada solo en parte por el usuario) |
+| 7 | Cálculos de amortización, tabla virtual y guardado del préstamo | Entregado |
 | 8 | Recibos de ingreso | Pendiente |
 | 9 | Renovación de préstamos | Pendiente |
 | 10 | Pruebas, documentación y presentación | Pendiente |
@@ -37,5 +37,7 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | Apertura: selección de cliente, límite disponible, garante, condiciones, mora, seguro, gasto de cierre | Entregado |
 | Apertura: fecha sugerida del primer pago calculada en PHP (CalendarioService) | Entregado |
 | Apertura: crear tipo de préstamo desde un modal sin salir de la pantalla | Entregado |
-| Apertura: botón Calcular (solo valida), tabla de amortización, desembolso y Guardar | Pendiente (Etapa 7) |
+| Motor de amortización en PHP (absoluto, insoluto, fijo; seguro; gasto de cierre financiado) | Entregado (probado contra una referencia exacta: 4.009 casos sin diferencias) |
+| Apertura: Calcular (servidor), tabla virtual, desembolso y fecha del primer pago | Entregado |
+| Apertura: Guardar en transacción (cabecera + cuotas, número por secuencia, límite bloqueado) | Entregado (falta tu prueba con SQL Server) |
 | Recibos y renovaciones | Pendiente |

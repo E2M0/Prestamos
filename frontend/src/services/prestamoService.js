@@ -12,6 +12,18 @@ export async function obtenerCreditoCliente(clienteId) {
   return data.datos
 }
 
+// Botón Calcular: el servidor valida y devuelve { cuotas, resumen }. No guarda nada.
+export async function calcularPrestamo(payload) {
+  const { data } = await api.post('/prestamos/calcular', payload)
+  return data.datos
+}
+
+// Botón Guardar: el servidor vuelve a validar y recalcular, y guarda cabecera y cuotas en una transacción.
+export async function guardarPrestamo(payload) {
+  const { data } = await api.post('/prestamos', payload)
+  return data.datos
+}
+
 // El servidor calcula la fecha sugerida del primer pago según el tipo de plazo.
 export async function obtenerFechaPrimerPago(parametros) {
   const { data } = await api.get('/prestamos/fecha-primer-pago', { params: parametros })

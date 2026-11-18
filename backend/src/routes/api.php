@@ -38,3 +38,7 @@ $router->patch('/api/tipos-prestamo/{id}/estado', [TipoPrestamoController::class
 $router->get('/api/catalogos/prestamos',          [CatalogoController::class, 'prestamos']);
 $router->get('/api/clientes/{id}/credito',        [PrestamoController::class, 'credito']);
 $router->get('/api/prestamos/fecha-primer-pago',  [PrestamoController::class, 'fechaPrimerPago']);
+
+// Apertura de préstamos: cálculo y guardado (Etapa 7)
+$router->post('/api/prestamos/calcular', [PrestamoController::class, 'calcular']);
+$router->post('/api/prestamos',          [PrestamoController::class, 'crear']);

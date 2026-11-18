@@ -108,4 +108,59 @@ final class PrestamoService
 
         return ['fechaPrimerPago' => $fecha->format('Y-m-d')];
     }
+
+    /** Botón Calcular: valida y devuelve la tabla de amortización y el resumen, sin guardar nada. */
+    public function calcular(array $d): array
+    {
+        return AmortizacionService::calcular($this->validar($d));
+    }
+
+    /**
+     * Botón Guardar: una sola transacción que valida de nuevo (con el límite disponible real, bloqueando al cliente),
+     * recalcula las cuotas en el servidor —nunca se confía en una tabla enviada por el navegador— y guarda
+     * la cabecera del préstamo y sus cuotas.
+     */
+    public function guardar(array $d, int $usuarioId): array
+    {
+        return Database::transaccion(function () use ($d, $usuarioId): array {
+            $clienteId = (int) filter_var($d['clienteId'] ?? null, FILTER_VALIDATE_INT);
+            if ($clienteId > 0) {
+                $this->prestamos->bloquearCliente($clienteId);
+            }
+
+            $datos = $this->validar($d);
+            $calculo = AmortizacionService::calcular($datos);
+            [$id, $numero] = $this->prestamos->insertar($datos, $calculo['resumen'], $usuarioId);
+            $this->prestamos->insertarCuotas($id, $calculo['cuotas']);
+
+            return ['id' => $id, 'numero' => $numero, 'clienteId' => $clienteId] + $calculo;
+        });
+    }
+
+    /** Valida los datos de la apertura contra los catálogos y el crédito del cliente. Lanza 422 si hay errores. */
+    private function validar(array $d): array
+    {
+        $clienteId = (int) filter_var($d['clienteId'] ?? null, FILTER_VALIDATE_INT);
+        try {
+            $credito = $clienteId > 0 ? $this->credito($clienteId) : null;
+        } catch (ErrorApi) {
+            $credito = null; // cliente inexistente: la validación lo reporta como "Seleccione el cliente"
+        }
+
+        $ctx = [
+            'credito'        => $credito,
+            'plazos'         => array_column($this->catalogos->tiposPlazo(), null, 'id'),
+            'amortizaciones' => array_column($this->catalogos->tiposAmortizacion(), null, 'id'),
+            'tiposPrestamo'  => array_fill_keys(
+                array_map('intval', array_column($this->tipos->listar(['estado' => 'Activo']), 'id')),
+                true
+            ),
+        ];
+
+        [$errores, $datos] = PrestamoValidador::validar($d, $ctx);
+        if ($errores) {
+            throw new ErrorApi('Revise los datos del préstamo.', 422, $errores);
+        }
+        return $datos;
+    }
 }

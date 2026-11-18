@@ -1,4 +1,4 @@
-// Validaciones del formulario de apertura. Mismas claves de error que usará el servidor en la Etapa 7.
+// Validaciones del formulario de apertura. Mismas claves de error que devuelve el servidor (PrestamoValidador.php).
 // Importante: aquí solo se valida; ningún cálculo financiero se hace en React.
 import { formatoMoneda } from './formato'
 
@@ -82,3 +82,24 @@ export function validarApertura(f, cat, credito) {
 
   return e
 }
+
+// Datos que se envían al servidor (Calcular y Guardar). Solo se convierten tipos; no se calcula nada.
+export const aPayloadApertura = (f, credito) => ({
+  clienteId: credito?.id ?? null,
+  tipoPrestamoId: Number(f.tipoPrestamoId),
+  monto: Number(f.monto),
+  plazo: Number(f.plazo),
+  tasa: Number(f.tasa),
+  tipoPlazoId: Number(f.tipoPlazoId),
+  tipoAmortizacionId: Number(f.tipoAmortizacionId),
+  incluyeSabado: Boolean(f.incluyeSabado),
+  incluyeDomingo: Boolean(f.incluyeDomingo),
+  tipoMora: f.tipoMora,
+  valorMora: Number(f.valorMora),
+  seguroTipo: f.seguroTipo,
+  seguroMonto: Number(f.seguroMonto),
+  gastoCierre: Number(f.gastoCierre),
+  gastoFinanciado: Boolean(f.gastoFinanciado),
+  fechaApertura: f.fechaApertura,
+  fechaPrimerPago: f.fechaPrimerPago,
+})

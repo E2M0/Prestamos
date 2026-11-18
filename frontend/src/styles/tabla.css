@@ -13,3 +13,17 @@
 .tabla tbody tr:focus-visible { outline-offset: -2px; }
 .tabla__fila--activa,
 .tabla tbody tr.tabla__fila--activa:hover { background: var(--esmeralda-fondo); }
+
+/* Tabla de solo lectura (amortización): sin selección, números a la derecha, cabecera fija al desplazar */
+.tabla--plana tbody tr { cursor: default; }
+.tabla--plana tbody tr:hover { background: transparent; }
+.tabla__num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tabla__contenedor--alto { max-height: 440px; overflow: auto; }
+.tabla__contenedor--alto th { position: sticky; top: 0; z-index: 1; }
+
+.resumen-calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.resumen-calculo__item { border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; background: var(--blanco); }
+.resumen-calculo__item span { display: block; font-size: 0.75rem; color: var(--texto-suave); }
+.resumen-calculo__item strong { display: block; margin-top: 2px; font-size: 1.05rem; }
+.resumen-calculo__item--destacado { background: var(--esmeralda-fondo); border-color: var(--esmeralda-suave); }
+.resumen-calculo__item--destacado strong { color: var(--esmeralda-oscuro); }

@@ -16,3 +16,9 @@ export function formatoFechaHora(iso) {
     minute: '2-digit',
   })
 }
+
+// 'AAAA-MM-DD' -> 'DD/MM/AAAA' (sin pasar por Date, para que la zona horaria no cambie el día).
+export function formatoFecha(texto) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(texto || '')
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : ''
+}

@@ -2,19 +2,24 @@ import { useEffect, useState } from 'react'
 import { Calculator, Plus, RotateCcw, Save, Search, UserRound } from 'lucide-react'
 import useApi from '../hooks/useApi'
 import { listarClientes } from '../services/clienteService'
-import { obtenerCatalogosPrestamos, obtenerCreditoCliente, obtenerFechaPrimerPago } from '../services/prestamoService'
+import {
+  calcularPrestamo, guardarPrestamo, obtenerCatalogosPrestamos, obtenerCreditoCliente, obtenerFechaPrimerPago,
+} from '../services/prestamoService'
 import { formatoMoneda } from '../utils/formato'
-import { aperturaVacia, esFechaReal, validarApertura } from '../utils/validacionesPrestamo'
+import { aPayloadApertura, aperturaVacia, esFechaReal, validarApertura } from '../utils/validacionesPrestamo'
 import Alerta from '../components/Alerta'
 import Boton from '../components/Boton'
 import Campo from '../components/Campo'
 import CampoSelect from '../components/CampoSelect'
 import Cargando from '../components/Cargando'
+import ConfirmDialog from '../components/ConfirmDialog'
 import EstadoVacio from '../components/EstadoVacio'
 import Etiqueta from '../components/Etiqueta'
 import ModalConsulta from '../components/ModalConsulta'
 import SeccionForm from '../components/SeccionForm'
 import ModalNuevoTipoPrestamo from '../components/prestamos/ModalNuevoTipoPrestamo'
+import ResumenCalculo from '../components/prestamos/ResumenCalculo'
+import TablaAmortizacion from '../components/prestamos/TablaAmortizacion'
 import '../styles/formularios.css'
 
 // Fuera del componente para que ModalConsulta reciba referencias estables. Solo clientes activos.
@@ -56,9 +61,18 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
   const [consultaAbierta, setConsultaAbierta] = useState(false)
   const [tipoNuevoAbierto, setTipoNuevoAbierto] = useState(false)
   const [cargandoCredito, setCargandoCredito] = useState(false)
+  const [calculo, setCalculo] = useState(null) // { cuotas, resumen } devuelto por el servidor
+  const [huella, setHuella] = useState('') // datos con los que se hizo el cálculo
+  const [calculando, setCalculando] = useState(false)
+  const [confirmarGuardar, setConfirmarGuardar] = useState(false)
+  const [guardando, setGuardando] = useState(false)
 
   const plazo = catalogos.tiposPlazo.find((p) => p.id === Number(form.tipoPlazoId))
   const cambiar = (parcial) => setForm((f) => ({ ...f, ...parcial }))
+
+  // El cálculo solo vale mientras los datos no cambien: si se modifica algo, hay que calcular de nuevo.
+  const huellaActual = JSON.stringify(aPayloadApertura(form, credito))
+  const calculoVigente = calculo !== null && huella === huellaActual
 
   // La fecha del primer pago se sugiere según el tipo de plazo (la calcula el servidor);
   // si el usuario la cambia a mano, deja de actualizarse sola.
@@ -79,6 +93,8 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
   }, [primerPagoManual, plazo, form.fechaApertura, form.incluyeSabado, form.incluyeDomingo])
 
   function nuevo() {
+    setCalculo(null)
+    setHuella('')
     setCredito(null)
     setForm(aperturaVacia(catalogos.hoy))
     setPrimerPagoManual(false)
@@ -117,20 +133,54 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
     setMensaje({ tipo: 'exito', texto: `Tipo de préstamo "${tipo.nombre}" creado y seleccionado.` })
   }
 
-  function calcular() {
+  async function calcular() {
     setMensaje(null)
     const nuevos = validarApertura(form, catalogos, credito)
     setErrores(nuevos)
     if (Object.keys(nuevos).length) {
+      setCalculo(null)
       setMensaje({ tipo: 'error', texto: 'Revise los campos marcados en rojo.' })
       enfocarPrimerError()
       return
     }
-    setMensaje({
-      tipo: 'info',
-      texto:
-        'Los datos son válidos. La tabla de amortización, el desembolso y el guardado del préstamo se construyen en la Etapa 7.',
-    })
+
+    setCalculando(true)
+    try {
+      setCalculo(await calcularPrestamo(aPayloadApertura(form, credito)))
+      setHuella(huellaActual)
+      setMensaje({ tipo: 'exito', texto: 'Cálculo generado. Revise la tabla de amortización y presione Guardar.' })
+    } catch (e) {
+      setCalculo(null)
+      setErrores(e.errores || {})
+      setMensaje({ tipo: 'error', texto: e.message })
+      if (Object.keys(e.errores || {}).length) enfocarPrimerError()
+    } finally {
+      setCalculando(false)
+    }
+  }
+
+  async function guardar() {
+    setGuardando(true)
+    try {
+      const prestamo = await guardarPrestamo(aPayloadApertura(form, credito))
+      const { resumen } = prestamo
+      setConfirmarGuardar(false)
+      nuevo()
+      setMensaje({
+        tipo: 'exito',
+        texto: `Préstamo ${prestamo.numero} registrado: ${formatoMoneda(resumen.monto)} en ${resumen.plazo} cuota(s). Desembolso: ${formatoMoneda(resumen.desembolso)}.`,
+      })
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (e) {
+      // El servidor revalida: si ya no cumple (por ejemplo, el límite cambió), se vuelve a Calcular.
+      setConfirmarGuardar(false)
+      setCalculo(null)
+      setErrores(e.errores || {})
+      setMensaje({ tipo: 'error', texto: e.message })
+      if (credito) obtenerCreditoCliente(credito.id).then(setCredito).catch(() => {}) // refresca el disponible
+    } finally {
+      setGuardando(false)
+    }
   }
 
   const tiposPrestamo = catalogos.tiposPrestamo.map((t) => ({ valor: t.id, etiqueta: t.nombre }))
@@ -143,8 +193,8 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
           <Boton variante="fantasma" icono={RotateCcw} onClick={nuevo}>Limpiar</Boton>
         </div>
         <div className="barra-acciones__grupo">
-          <Boton variante="secundario" icono={Calculator} onClick={calcular}>Calcular</Boton>
-          <Boton icono={Save} disabled title="Se habilita en la Etapa 7">Guardar</Boton>
+          <Boton variante="secundario" icono={Calculator} cargando={calculando} onClick={calcular}>Calcular</Boton>
+          <Boton icono={Save} disabled={!calculoVigente} onClick={() => setConfirmarGuardar(true)}>Guardar</Boton>
         </div>
       </div>
 
@@ -330,12 +380,26 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
         </div>
       </SeccionForm>
 
-      <SeccionForm titulo="5. Tabla de amortización" descripcion="Se genera al presionar Calcular.">
-        <EstadoVacio
-          compacto
-          titulo="Aún no hay cálculo"
-          texto="El cálculo de cuotas, desembolso y balances lo hace el servidor y se construye en la Etapa 7."
-        />
+      <SeccionForm titulo="5. Tabla de amortización" descripcion="Se genera al presionar Calcular. Los valores los calcula el servidor.">
+        {calculoVigente ? (
+          <>
+            <ResumenCalculo resumen={calculo.resumen} />
+            {calculo.resumen.soloPrimeraCuota && (
+              <Alerta tipo="info">
+                Saldo fijo: al aperturar solo se genera la primera cuota. Las siguientes se generan al saldarse la anterior.
+              </Alerta>
+            )}
+            <TablaAmortizacion cuotas={calculo.cuotas} />
+          </>
+        ) : calculo ? (
+          <Alerta tipo="info">Los datos cambiaron desde el último cálculo. Presione Calcular de nuevo para poder guardar.</Alerta>
+        ) : (
+          <EstadoVacio
+            compacto
+            titulo="Aún no hay cálculo"
+            texto="Complete el formulario y presione Calcular para ver las cuotas, el desembolso y la fecha del primer pago."
+          />
+        )}
       </SeccionForm>
 
       <ModalConsulta
@@ -345,6 +409,20 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
         cargar={cargarClientesActivos}
         onSeleccionar={seleccionarCliente}
         onCerrar={() => setConsultaAbierta(false)}
+      />
+
+      <ConfirmDialog
+        abierto={confirmarGuardar}
+        titulo="Confirmar apertura del préstamo"
+        mensaje={
+          calculoVigente && credito
+            ? `Se aperturará un préstamo de ${formatoMoneda(calculo.resumen.monto)} a ${credito.nombreCompleto}, con desembolso de ${formatoMoneda(calculo.resumen.desembolso)}. Los préstamos no se eliminan una vez registrados.`
+            : ''
+        }
+        textoConfirmar="Aperturar préstamo"
+        cargando={guardando}
+        onConfirmar={guardar}
+        onCancelar={() => setConfirmarGuardar(false)}
       />
 
       <ModalNuevoTipoPrestamo abierto={tipoNuevoAbierto} onCreado={tipoCreado} onCerrar={() => setTipoNuevoAbierto(false)} />

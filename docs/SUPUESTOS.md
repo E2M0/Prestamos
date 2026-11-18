@@ -42,8 +42,29 @@ documentadas y se apliquen de forma consistente. Estas son las del proyecto hast
     0 a 100; el primer pago no puede ser anterior a la apertura; si el gasto de cierre no se financia debe ser menor
     que el monto (para que exista desembolso).
 
-## Reglas financieras (se implementarán en las etapas 7 a 9)
-22. Mora: se cobra **una sola vez por cuota vencida**, como porcentaje del valor de la cuota o como monto fijo.
-23. Límite disponible = límite de crédito − capital pendiente de los préstamos activos del cliente.
-24. Saldo fijo: al saldarse la cuota k se genera la k+1 en la misma transacción del recibo.
-25. Los pagos recibidos del dashboard excluyen los recibos de cancelación por renovación (no entra dinero).
+## Cálculo de amortización y apertura (Etapa 7)
+Todo el cálculo está en PHP (`AmortizacionService`); React solo muestra lo que devuelve el servidor.
+22. La tasa es **porcentaje mensual nominal** y se convierte al período: `i = tasa/100 × días del período / 30`
+    (trimestral = 3 meses, anual = 12 meses, etc.).
+23. **Absoluto:** capital = monto / n e interés = monto × i, iguales en todas las cuotas.
+    **Insoluto:** cuota = M·i / (1 − (1+i)^−n); interés = balance anterior × i; capital = cuota − interés.
+    **Saldo fijo:** capital = monto / n; interés = capital pendiente × i; en la apertura solo se genera la 1.ª cuota.
+24. Con tasa 0 la fórmula del saldo insoluto divide entre cero; en ese caso la cuota es monto / n.
+25. Cada importe se redondea a 2 decimales (mitad hacia arriba) y el ajuste final cae en la **última cuota**,
+    para que el balance termine exactamente en cero.
+26. Seguro **fijo**: el mismo monto en cada cuota. Seguro **repartido**: monto total / n por cuota; la última absorbe la diferencia.
+27. Gasto de cierre **financiado**: se reparte entre las cuotas como el seguro repartido y el desembolso es el monto completo.
+    **No financiado:** desembolso = monto − gasto de cierre.
+28. Si el primer pago cae en un sábado o domingo excluido (plazo diario), se rechaza; no se corre solo a otro día.
+29. Al guardar, el servidor **vuelve a validar y a calcular** (no confía en la tabla del navegador) dentro de una
+    transacción que bloquea la fila del cliente, para que dos aperturas simultáneas no superen el límite de crédito.
+30. El número del préstamo (`PR-000010`) sale de una secuencia de SQL Server; si una transacción falla, ese número
+    se pierde (queda un hueco). Es normal y garantiza que nunca se repita.
+31. Un cálculo solo es válido mientras el formulario no cambie: al modificar cualquier dato hay que volver a calcular.
+
+## Reglas financieras (se implementarán en las etapas 8 y 9)
+32. Mora: se cobra **una sola vez por cuota vencida**, como porcentaje del valor de la cuota o como monto fijo.
+33. Límite disponible = límite de crédito − capital pendiente de los préstamos activos del cliente.
+34. Saldo fijo: al saldarse la cuota k se genera la k+1 en la misma transacción del recibo (capital = monto / n;
+    la última cuota toma el balance restante).
+35. Los pagos recibidos del dashboard excluyen los recibos de cancelación por renovación (no entra dinero).

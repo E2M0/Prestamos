@@ -36,6 +36,12 @@ final class ClienteValidador
         return trim(preg_replace('/\s+/u', ' ', self::texto($valor)) ?? '');
     }
 
+    /** Cantidad de caracteres (no de bytes); no depende de la extensión mbstring. */
+    public static function largo(string $texto): int
+    {
+        return (int) preg_match_all('/./us', $texto);
+    }
+
     public static function normalizarDocumento(string $documento): string
     {
         return strtoupper(trim($documento));

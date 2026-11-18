@@ -38,11 +38,11 @@ final class TipoPrestamoService
         $descripcion = ClienteValidador::limpiar($datos['descripcion'] ?? '');
 
         $errores = [];
-        $largo = mb_strlen($nombre);
+        $largo = ClienteValidador::largo($nombre);
         if ($largo < 2 || $largo > 60) {
             $errores['nombre'] = 'Ingrese el nombre (entre 2 y 60 caracteres).';
         }
-        if (mb_strlen($descripcion) > 250) {
+        if (ClienteValidador::largo($descripcion) > 250) {
             $errores['descripcion'] = 'Máximo 250 caracteres.';
         }
         if ($errores) {
