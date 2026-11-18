@@ -29,8 +29,21 @@ documentadas y se apliquen de forma consistente. Estas son las del proyecto hast
 15. El garante existente se carga en solo lectura; el botón "Editar datos del garante" permite actualizar
     el registro de esa persona.
 
-## Reglas financieras (se implementarán en las etapas 6 a 9)
-16. Mora: se cobra **una sola vez por cuota vencida**, como porcentaje del valor de la cuota o como monto fijo.
-17. Límite disponible = límite de crédito − capital pendiente de los préstamos activos del cliente.
-18. Saldo fijo: al saldarse la cuota k se genera la k+1 en la misma transacción del recibo.
-19. Los pagos recibidos del dashboard excluyen los recibos de cancelación por renovación (no entra dinero).
+## Tipos de préstamo y apertura (Etapa 6)
+16. El nombre del tipo de préstamo es único. Los tipos no se eliminan: se inactivan; un tipo inactivo no se ofrece
+    en préstamos nuevos, pero los préstamos que ya lo usan lo conservan.
+17. El tipo de préstamo puede crearse desde la propia apertura (botón "Nuevo tipo"), sin salir de la pantalla.
+18. Solo se aperturan préstamos a clientes activos.
+19. La fecha sugerida del primer pago la calcula el servidor (`CalendarioService`): mensual, trimestral, semestral
+    y anual avanzan por meses de calendario (31 de enero + 1 mes = 28 o 29 de febrero); los demás plazos, por días.
+    Las fechas se miden siempre desde la fecha base, para que el fin de mes no arrastre el error a las cuotas siguientes.
+20. Solo el plazo diario permite excluir sábados y domingos; los días excluidos se saltan.
+21. Reglas de validación de la apertura: cuotas enteras de 1 a 600; tasa mensual de 0 a 100; mora en porcentaje de
+    0 a 100; el primer pago no puede ser anterior a la apertura; si el gasto de cierre no se financia debe ser menor
+    que el monto (para que exista desembolso).
+
+## Reglas financieras (se implementarán en las etapas 7 a 9)
+22. Mora: se cobra **una sola vez por cuota vencida**, como porcentaje del valor de la cuota o como monto fijo.
+23. Límite disponible = límite de crédito − capital pendiente de los préstamos activos del cliente.
+24. Saldo fijo: al saldarse la cuota k se genera la k+1 en la misma transacción del recibo.
+25. Los pagos recibidos del dashboard excluyen los recibos de cancelación por renovación (no entra dinero).

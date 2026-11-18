@@ -5,8 +5,8 @@ import { Banknote, HandCoins, LayoutDashboard, RefreshCw, Tags, Users } from 'lu
 export const NAVEGACION = [
   { ruta: '/', titulo: 'Dashboard', icono: LayoutDashboard },
   { ruta: '/clientes', titulo: 'Clientes y garantes', icono: Users },
-  { ruta: '/tipos-prestamo', titulo: 'Tipos de préstamo', icono: Tags, etapa: 6 },
-  { ruta: '/prestamos', titulo: 'Apertura de préstamos', icono: HandCoins, etapa: 6 },
+  { ruta: '/tipos-prestamo', titulo: 'Tipos de préstamo', icono: Tags },
+  { ruta: '/prestamos', titulo: 'Apertura de préstamos', icono: HandCoins },
   { ruta: '/recibos', titulo: 'Recibos de ingreso', icono: Banknote, etapa: 8 },
   { ruta: '/renovaciones', titulo: 'Renovaciones', icono: RefreshCw, etapa: 9 },
 ]

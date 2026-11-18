@@ -9,4 +9,10 @@ final class CatalogoController
         Sesion::requerir();
         Respuesta::ok((new ClienteService())->catalogos());
     }
+
+    public function prestamos(array $parametros): void
+    {
+        Sesion::requerir();
+        Respuesta::ok((new PrestamoService())->catalogos());
+    }
 }

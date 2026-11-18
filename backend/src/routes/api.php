@@ -28,3 +28,13 @@ $router->post('/api/clientes',             [ClienteController::class, 'crear']);
 $router->get('/api/clientes/{id}',         [ClienteController::class, 'obtener']);
 $router->put('/api/clientes/{id}',         [ClienteController::class, 'actualizar']);
 $router->patch('/api/clientes/{id}/estado', [ClienteController::class, 'cambiarEstado']);
+
+// Tipos de préstamo y apertura (Etapa 6)
+$router->get('/api/tipos-prestamo',               [TipoPrestamoController::class, 'listar']);
+$router->post('/api/tipos-prestamo',              [TipoPrestamoController::class, 'crear']);
+$router->get('/api/tipos-prestamo/{id}',          [TipoPrestamoController::class, 'obtener']);
+$router->put('/api/tipos-prestamo/{id}',          [TipoPrestamoController::class, 'actualizar']);
+$router->patch('/api/tipos-prestamo/{id}/estado', [TipoPrestamoController::class, 'cambiarEstado']);
+$router->get('/api/catalogos/prestamos',          [CatalogoController::class, 'prestamos']);
+$router->get('/api/clientes/{id}/credito',        [PrestamoController::class, 'credito']);
+$router->get('/api/prestamos/fecha-primer-pago',  [PrestamoController::class, 'fechaPrimerPago']);

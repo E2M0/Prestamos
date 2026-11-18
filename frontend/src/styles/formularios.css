@@ -54,3 +54,20 @@
   .garante__busqueda { grid-template-columns: 1fr; }
   .seccion__cuerpo, .seccion__cabecera { padding-left: 14px; padding-right: 14px; }
 }
+
+/* ---------- Apertura de préstamos ---------- */
+.resumen-cliente { border: 1px solid var(--borde); border-radius: 10px; padding: 14px 16px; background: var(--fondo); }
+.resumen-cliente__nombre { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.resumen-cliente__datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 20px; margin: 0; }
+.resumen-cliente__datos dt { font-size: 0.75rem; color: var(--texto-suave); }
+.resumen-cliente__datos dd { margin: 2px 0 0; font-weight: 600; }
+.resumen-cliente__disponible { color: var(--esmeralda-oscuro); }
+
+.campo-con-accion { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.campo-con-accion .campo { width: 100%; }
+
+.opciones-fila { display: flex; gap: 24px; flex-wrap: wrap; }
+.casilla { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+.casilla--alta { min-height: 42px; }
+.campo__etiqueta-falsa { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
+.enlace-boton { background: none; border: none; padding: 4px 0 0; color: var(--esmeralda-oscuro); font-size: 0.8rem; cursor: pointer; text-decoration: underline; }

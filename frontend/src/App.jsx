@@ -4,6 +4,8 @@ import LayoutPrincipal from './layouts/LayoutPrincipal'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clientes from './pages/Clientes'
+import Prestamos from './pages/Prestamos'
+import TiposPrestamo from './pages/TiposPrestamo'
 import PaginaPendiente from './pages/PaginaPendiente'
 import NoEncontrada from './pages/NoEncontrada'
 import { NAVEGACION } from './utils/navegacion'
@@ -19,6 +21,8 @@ export default function App() {
         <Route element={<LayoutPrincipal />}>
           <Route index element={<Dashboard />} />
           <Route path="/clientes" element={<Clientes />} />
+          <Route path="/tipos-prestamo" element={<TiposPrestamo />} />
+          <Route path="/prestamos" element={<Prestamos />} />
           {NAVEGACION.filter((n) => n.etapa).map((n) => (
             <Route key={n.ruta} path={n.ruta} element={<PaginaPendiente modulo={n.titulo} etapa={n.etapa} />} />
           ))}
