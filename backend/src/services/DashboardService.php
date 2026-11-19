@@ -7,12 +7,15 @@ final class DashboardService
     private const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     private const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-    public function __construct(private DashboardModel $modelo = new DashboardModel())
-    {
+    public function __construct(
+        private DashboardModel $modelo = new DashboardModel(),
+        private MoraService $mora = new MoraService(),
+    ) {
     }
 
     public function resumen(): array
     {
+        $this->mora->sincronizar(); // la mora y el estado de las cuotas vencidas se actualizan a la fecha de hoy
         $hoy = new DateTimeImmutable('today');
         $inicioMes = $hoy->modify('first day of this month');
         $inicioSiguiente = $inicioMes->modify('+1 month');

@@ -34,7 +34,8 @@ export function esFechaReal(texto) {
 }
 
 // credito: respuesta de /clientes/{id}/credito (null si aún no se eligió cliente).
-export function validarApertura(f, cat, credito) {
+// opciones.omitirLimite: en la renovación el límite lo valida el servidor (el capital cancelado queda libre).
+export function validarApertura(f, cat, credito, { omitirLimite = false } = {}) {
   const e = {}
 
   if (!credito) e.cliente = 'Seleccione el cliente.'
@@ -44,7 +45,7 @@ export function validarApertura(f, cat, credito) {
 
   const monto = numero(f.monto)
   if (monto === null || !(monto > 0) || monto > MAX_DECIMAL) e.monto = 'Ingrese un monto mayor que cero.'
-  else if (credito && monto > credito.disponible) {
+  else if (!omitirLimite && credito && monto > credito.disponible) {
     e.monto = `El monto supera el límite disponible (${formatoMoneda(credito.disponible)}).`
   }
 
@@ -103,3 +104,11 @@ export const aPayloadApertura = (f, credito) => ({
   fechaApertura: f.fechaApertura,
   fechaPrimerPago: f.fechaPrimerPago,
 })
+
+// Renovación: de 1 a 3 préstamos, cada uno con su base de saldo.
+export function validarRenovar(renovar) {
+  if (renovar.length < 1) return 'Seleccione al menos un préstamo para renovar.'
+  if (renovar.length > 3) return 'Máximo 3 préstamos por renovación.'
+  if (renovar.some((r) => !r.base)) return 'Elija la base de saldo de cada préstamo seleccionado.'
+  return ''
+}

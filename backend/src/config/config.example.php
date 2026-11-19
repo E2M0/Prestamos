@@ -17,5 +17,19 @@ return [
     'cors' => [
         'origenes' => ['http://localhost:5173', 'http://127.0.0.1:5173'],
     ],
+    'empresa' => [
+        'nombre' => 'Sistema de Gestión de Préstamos',   // aparece en el recibo impreso
+    ],
+    // Envío de recibos por correo (PHPMailer en backend/lib/PHPMailer/src). Con 'activo' => false el envío se desactiva.
+    'correo' => [
+        'activo'           => false,
+        'servidor'         => 'smtp.gmail.com',
+        'puerto'           => 587,
+        'seguridad'        => 'tls',          // tls (587) o ssl (465)
+        'usuario'          => '',             // cuenta que envía
+        'clave'            => '',             // contraseña de aplicación (no la clave normal)
+        'remitente'        => '',             // vacío = igual al usuario
+        'nombre_remitente' => 'Sistema de Préstamos',
+    ],
     'zona_horaria' => 'America/Santo_Domingo',
 ];

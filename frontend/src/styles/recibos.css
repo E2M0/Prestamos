@@ -1,0 +1,51 @@
+/* ---------- Pantalla de recibos ---------- */
+.cobro__rapidos { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 4px; }
+.cobro__rapidos > span { font-size: 0.8rem; color: var(--texto-suave); }
+.cobro__total { font-weight: 700; }
+.vista-previa { border: 1px solid var(--esmeralda-suave); background: var(--esmeralda-fondo); border-radius: 10px; padding: 14px 16px; margin-top: 16px; }
+.vista-previa h3 { font-size: 1rem; margin: 0 0 10px; }
+.vista-previa__notas { margin: 10px 0 0; padding-left: 18px; font-size: 0.85rem; color: var(--texto); }
+.tabla__numero { text-align: right; white-space: nowrap; }
+.tabla__contenedor--corta { max-height: 360px; overflow: auto; }
+.texto-rojo { color: var(--rojo); font-weight: 600; }
+
+/* ---------- Modal del recibo ---------- */
+.recibo-acciones { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; margin-bottom: 12px; }
+.recibo-acciones .campo { min-width: 220px; }
+.recibo-acciones__botones { display: flex; gap: 8px; flex-wrap: wrap; }
+.recibo-correo { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 16px; }
+.recibo-correo .campo { flex: 1; }
+.recibo-vista { background: var(--gris-suave); padding: 16px; border-radius: 10px; display: flex; justify-content: center; overflow: auto; }
+
+/* ---------- Papel del recibo (pantalla e impresión) ---------- */
+.recibo-papel { background: #fff; color: #111; font-size: 13px; line-height: 1.4; padding: 18px; box-shadow: var(--sombra); }
+.recibo-papel--a4 { width: 100%; max-width: 640px; }
+.recibo-papel--pos { width: 302px; max-width: 100%; font-size: 11px; padding: 10px; }
+.recibo-papel__cabecera { text-align: center; border-bottom: 1px dashed #888; padding-bottom: 8px; margin-bottom: 8px; position: relative; }
+.recibo-papel__cabecera h1 { font-size: 1.25em; margin: 0; }
+.recibo-papel__cabecera p { margin: 2px 0; color: #444; }
+.recibo-papel__anulado { display: inline-block; margin-top: 4px; border: 2px solid #b91c1c; color: #b91c1c; padding: 0 8px; font-weight: 700; }
+.recibo-papel__datos, .recibo-papel__totales { margin: 0 0 8px; }
+.recibo-papel__datos div, .recibo-papel__totales div { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
+.recibo-papel__datos dt, .recibo-papel__totales dt { color: #555; }
+.recibo-papel__datos dd, .recibo-papel__totales dd { margin: 0; text-align: right; font-weight: 600; }
+.recibo-papel__tabla { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.recibo-papel__tabla th { text-align: left; border-bottom: 1px solid #888; padding: 3px 0; }
+.recibo-papel__tabla th:last-child, .recibo-papel__tabla td:last-child { text-align: right; }
+.recibo-papel__tabla td { padding: 3px 0; border-bottom: 1px dotted #ccc; }
+.recibo-papel__tabla small { color: #666; }
+.recibo-papel__totales { border-top: 1px dashed #888; padding-top: 6px; }
+.recibo-papel__total { font-size: 1.15em; border-top: 1px solid #111; margin-top: 4px; padding-top: 4px !important; }
+.recibo-papel__total dt, .recibo-papel__total dd { color: #111 !important; font-weight: 700 !important; }
+.recibo-papel__obs { font-size: 0.9em; color: #444; }
+.recibo-papel__pie { text-align: center; border-top: 1px dashed #888; margin-top: 10px; padding-top: 6px; color: #555; }
+.recibo-papel__pie p { margin: 2px 0; }
+
+/* ---------- Impresión: solo se imprime el recibo ---------- */
+.zona-impresion { display: none; }
+@media print {
+  #root { display: none !important; }
+  .zona-impresion { display: block !important; }
+  .zona-impresion .recibo-papel { box-shadow: none; max-width: none; margin: 0 auto; }
+  body { background: #fff !important; }
+}

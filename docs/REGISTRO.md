@@ -12,9 +12,9 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | 4 | Layout, login, rutas, dashboard, componentes | Probado (dashboard cuadra con los datos de prueba) |
 | 5 | Clientes y garantes | Probado |
 | 6 | Tipos de préstamo y formulario de apertura | Entregado (probada solo en parte por el usuario) |
-| 7 | Cálculos de amortización, tabla virtual y guardado del préstamo | Entregado |
-| 8 | Recibos de ingreso | Pendiente |
-| 9 | Renovación de préstamos | Pendiente |
+| 7 | Cálculos de amortización, tabla virtual y guardado del préstamo | Probado |
+| 8 | Recibos de ingreso | Probado (correo sin probar: falta configurar SMTP) |
+| 9 | Renovación de préstamos | Entregado (falta tu prueba) |
 | 10 | Pruebas, documentación y presentación | Pendiente |
 
 ## Funcionalidades
@@ -40,4 +40,11 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | Motor de amortización en PHP (absoluto, insoluto, fijo; seguro; gasto de cierre financiado) | Entregado (probado contra una referencia exacta: 4.009 casos sin diferencias) |
 | Apertura: Calcular (servidor), tabla virtual, desembolso y fecha del primer pago | Entregado |
 | Apertura: Guardar en transacción (cabecera + cuotas, número por secuencia, límite bloqueado) | Entregado (falta tu prueba con SQL Server) |
-| Recibos y renovaciones | Pendiente |
+| Motor de pagos en PHP (normal, solo mora, abono a capital; FIJO genera cuotas) | Entregado (probado con ≈57.000 pagos simulados: invariantes sin errores; 300 préstamos saldados) |
+| Mora una vez por cuota, guardada y sincronizada (consulta, cobro y dashboard) | Entregado (lógica probada; SQL Server sin probar) |
+| Recibos: consulta de préstamo, vista previa, cobro en transacción, historial | Entregado (falta tu prueba) |
+| Recibo imprimible A4 / POS 80 mm, compartir, copiar resumen | Entregado (falta tu prueba en navegador) |
+| Envío del recibo por correo (PHPMailer + SMTP) | Entregado, **no probado** (requiere configurar SMTP) |
+| Renovación: selección de 1 a 3 préstamos del cliente y base de saldo (capital / a la fecha / general) | Entregado (falta tu prueba) |
+| Renovación: saldos, descuento y desembolso final calculados en PHP | Entregado (cálculo probado con 7.200 planes simulados: sin errores; SQL Server sin probar) |
+| Renovación: recibos de cancelación, préstamos anteriores «Renovado» y préstamo nuevo en una transacción | Entregado (falta tu prueba con SQL Server) |

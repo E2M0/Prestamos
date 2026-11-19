@@ -5,6 +5,8 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clientes from './pages/Clientes'
 import Prestamos from './pages/Prestamos'
+import Recibos from './pages/Recibos'
+import Renovaciones from './pages/Renovaciones'
 import TiposPrestamo from './pages/TiposPrestamo'
 import PaginaPendiente from './pages/PaginaPendiente'
 import NoEncontrada from './pages/NoEncontrada'
@@ -23,6 +25,8 @@ export default function App() {
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/tipos-prestamo" element={<TiposPrestamo />} />
           <Route path="/prestamos" element={<Prestamos />} />
+          <Route path="/recibos" element={<Recibos />} />
+          <Route path="/renovaciones" element={<Renovaciones />} />
           {NAVEGACION.filter((n) => n.etapa).map((n) => (
             <Route key={n.ruta} path={n.ruta} element={<PaginaPendiente modulo={n.titulo} etapa={n.etapa} />} />
           ))}

@@ -62,9 +62,57 @@ Todo el cálculo está en PHP (`AmortizacionService`); React solo muestra lo que
     se pierde (queda un hueco). Es normal y garantiza que nunca se repita.
 31. Un cálculo solo es válido mientras el formulario no cambie: al modificar cualquier dato hay que volver a calcular.
 
-## Reglas financieras (se implementarán en las etapas 8 y 9)
+## Reglas financieras (etapas 8 y 9)
 32. Mora: se cobra **una sola vez por cuota vencida**, como porcentaje del valor de la cuota o como monto fijo.
 33. Límite disponible = límite de crédito − capital pendiente de los préstamos activos del cliente.
-34. Saldo fijo: al saldarse la cuota k se genera la k+1 en la misma transacción del recibo (capital = monto / n;
-    la última cuota toma el balance restante).
+34. Saldo fijo: al saldarse la cuota k se genera la k+1 en la misma transacción del recibo. Capital de la cuota k =
+    capital pendiente / cuotas restantes (n − k + 1); la última cuota toma el balance restante. En la 1.ª cuota
+    equivale a monto / n.
 35. Los pagos recibidos del dashboard excluyen los recibos de cancelación por renovación (no entra dinero).
+
+## Recibos de ingreso (Etapa 8)
+36. Orden de aplicación de un pago normal, cuota por cuota (de la más antigua sin saldar a la más reciente):
+    seguro → mora → interés → gasto de cierre financiado → capital. Un pago puede cubrir varias cuotas o dejar una en «Parcial».
+37. Una cuota está vencida si su fecha de pago es **anterior a hoy** y no está saldada. La mora se calcula y se guarda
+    **una sola vez** por cuota (columna `mora_acumulada`) al consultar el préstamo, al cobrar o al abrir el dashboard
+    (`MoraService::sincronizar`). Por eso los indicadores del dashboard pueden cambiar respecto a los datos de prueba iniciales.
+38. Una cuota con mora queda «Pagada» solo cuando también se pagó su mora. Estado: Pagada · Parcial (hay pagos de
+    seguro/interés/gasto/capital) · Vencida (fecha pasada, sin pagos) · Pendiente.
+39. Pago «solo mora»: afecta únicamente la mora acumulada; no puede superar la mora pendiente.
+40. Pago normal: no puede superar lo adeudado. En saldo fijo, al saldarse una cuota nace la siguiente aunque no quede dinero
+    en ese pago; el préstamo pasa a «Saldado» cuando todas las cuotas (hasta el plazo) están saldadas.
+41. **Abono a capital** (criterios propios, el enunciado no los detalla):
+    a) no se permite con mora pendiente (se paga primero la mora);
+    b) solo reduce el capital de las cuotas **futuras** (pendientes, sin pagos y no vencidas); el máximo es ese capital futuro (Cf);
+    c) «Reducir cuota»: mismo número de cuotas, cada una con menos capital; «Reducir plazo»: desaparecen las últimas cuotas
+       y se conserva el capital por cuota (absoluto/fijo) o la cuota total (insoluto);
+    d) en **absoluto** el interés de las cuotas futuras baja en proporción al capital que queda (Cf' / Cf) — desviación
+       del enunciado, necesaria porque el interés absoluto es fijo sobre el monto original; en insoluto y fijo el interés se
+       recalcula sobre el nuevo balance;
+    e) si el abono cancela todo el capital futuro, esas cuotas desaparecen.
+42. Los importes se calculan en centavos enteros en PHP; React solo muestra y copia los valores sugeridos que envía el servidor.
+43. Cada recibo se guarda con su detalle por cuota (o una línea sin cuota para el abono a capital) en una transacción
+    con el préstamo bloqueado; la vista previa usa exactamente el mismo cálculo que el cobro.
+44. Los números de recibo (`RC-000036`) salen de una secuencia: puede haber saltos si una transacción falla.
+45. El correo usa PHPMailer (descarga manual en `backend/lib/PHPMailer/src`, sin Composer) y el bloque `correo` de
+    `config.php`; sin esa configuración el servidor responde que el envío no está disponible. Compartir usa la API de
+    compartir del navegador o WhatsApp Web. La impresión usa `@page` (A4 u 80 mm).
+46. No se anulan recibos en esta etapa (el estado «Anulado» existe en la base de datos pero no hay pantalla para anular).
+
+## Renovación de préstamos (Etapa 9)
+47. La renovación reutiliza el formulario de apertura (mismos campos, cálculo y tabla virtual) y agrega la selección de
+    1 a 3 préstamos **activos del mismo cliente**, cada uno con su base de saldo. Un préstamo ya renovado no vuelve a renovarse.
+48. Bases de saldo: **Capital pendiente** = capital que falta (de todas las cuotas); **Balance a la fecha** = capital +
+    mora, interés, seguro y gasto de cierre de las cuotas con fecha de pago ≤ hoy; **Balance general** = todo lo pendiente,
+    incluidos intereses, seguros y gastos futuros. Los tres saldos los calcula PHP (`CancelacionService`).
+49. Lo que la base elegida no cubre se registra como **descuento**: el importe pendiente de esas cuotas se reduce a lo ya
+    pagado (condonación), por lo que sus cuotas quedan «Pagada» y el préstamo anterior pasa a **Renovado** con capital pendiente 0.
+50. Cada préstamo cancelado genera su recibo de ingreso (tipo «normal», observación «Cancelación por renovación»), con el
+    detalle por cuota. Esos recibos no suman en los ingresos del dashboard (no entra dinero).
+51. En saldo fijo solo existen las cuotas ya generadas: el capital que aún no está en ninguna cuota se cobra como una línea
+    sin cuota, y los intereses futuros no generados no existen todavía (el balance general no los incluye).
+52. Validaciones: monto del préstamo nuevo ≥ suma de saldos a cancelar; desembolso del préstamo nuevo ≥ suma de saldos
+    (desembolso final = desembolso nuevo − suma de saldos, nunca negativo). El límite de crédito se valida contando
+    como libre el capital de los préstamos que se cancelan.
+53. Todo ocurre en una sola transacción con los préstamos y el cliente bloqueados: si algo falla no se guarda nada
+    (ni recibos, ni cambios en los préstamos anteriores, ni el préstamo nuevo).

@@ -1,0 +1,10 @@
+.renovar-lista { display: grid; gap: 10px; }
+.renovar-item { display: grid; grid-template-columns: auto 1fr minmax(180px, 220px); gap: 12px; align-items: center; border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; background: var(--blanco); }
+.renovar-item--activo { border-color: var(--esmeralda-suave); background: var(--esmeralda-fondo); }
+.renovar-item__datos strong { display: block; }
+.renovar-item__datos span { font-size: 0.8rem; color: var(--texto-suave); }
+.renovar-item__saldo { font-size: 0.8rem; color: var(--texto-suave); margin-top: 4px; }
+.renovar-item__saldo strong { color: var(--esmeralda-oscuro); }
+.renovar-item .campo { margin: 0; }
+.renovar-contador { font-size: 0.85rem; color: var(--texto-suave); margin: 0 0 10px; }
+@media (max-width: 720px) { .renovar-item { grid-template-columns: auto 1fr; } .renovar-item .campo { grid-column: 1 / -1; } }

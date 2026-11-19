@@ -71,6 +71,71 @@ final class PrestamoModel
         }
     }
 
+    private const SELECT_COMPLETO = "SELECT p.*, c.nombres, c.apellidos, c.numero_documento, c.correo,
+                tp.nombre AS tipo_prestamo, pl.nombre AS plazo_nombre, pl.dias_periodo, pl.meses_periodo,
+                pl.permite_excluir_fines_semana, ta.codigo AS amortizacion_codigo, ta.nombre AS amortizacion_nombre";
+
+    /** Préstamo con cliente, tipo, plazo y amortización. Con $bloquear toma un bloqueo hasta terminar la transacción. */
+    public function buscarPorId(int $id, bool $bloquear = false): ?array
+    {
+        $hint = $bloquear ? ' WITH (UPDLOCK, HOLDLOCK)' : '';
+        $st = Database::conexion()->prepare(
+            self::SELECT_COMPLETO . "
+               FROM prestamos AS p$hint
+               JOIN clientes c ON c.id = p.cliente_id
+               JOIN tipos_prestamo tp ON tp.id = p.tipo_prestamo_id
+               JOIN tipos_plazo pl ON pl.id = p.tipo_plazo_id
+               JOIN tipos_amortizacion ta ON ta.id = p.tipo_amortizacion_id
+              WHERE p.id = ?"
+        );
+        $st->execute([$id]);
+        $fila = $st->fetch();
+        return $fila === false ? null : $fila;
+    }
+
+    /** Búsqueda para el modal de consulta: por número, nombre o documento del cliente. Máximo 100. */
+    public function listar(array $filtros): array
+    {
+        $sql = "SELECT TOP 100 p.id, p.numero, p.monto, p.capital_pendiente, p.estado, p.fecha_apertura,
+                       c.nombres, c.apellidos, c.numero_documento, ta.nombre AS amortizacion_nombre
+                  FROM prestamos p
+                  JOIN clientes c ON c.id = p.cliente_id
+                  JOIN tipos_amortizacion ta ON ta.id = p.tipo_amortizacion_id
+                 WHERE 1 = 1";
+        $params = [];
+        $buscar = trim((string) ($filtros['buscar'] ?? ''));
+        if ($buscar !== '') {
+            $like = Sql::contiene($buscar);
+            $sql .= " AND (p.numero LIKE ? OR c.nombres LIKE ? OR c.apellidos LIKE ? OR c.numero_documento LIKE ?
+                           OR (c.nombres + N' ' + c.apellidos) LIKE ?)";
+            array_push($params, $like, $like, $like, $like, $like);
+        }
+        if (in_array($filtros['estado'] ?? '', ['Activo', 'Saldado', 'Renovado'], true)) {
+            $sql .= ' AND p.estado = ?';
+            $params[] = $filtros['estado'];
+        }
+        $sql .= ' ORDER BY p.id DESC';
+        $st = Database::conexion()->prepare($sql);
+        $st->execute($params);
+        return $st->fetchAll();
+    }
+
+    /** Ids de los préstamos activos de un cliente, de menor a mayor. */
+    public function idsActivosDelCliente(int $clienteId): array
+    {
+        $st = Database::conexion()->prepare("SELECT id FROM prestamos WHERE cliente_id = ? AND estado = N'Activo' ORDER BY id");
+        $st->execute([$clienteId]);
+        return array_map('intval', $st->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    /** Actualiza capital pendiente, plazo y estado tras un recibo. */
+    public function actualizarEstado(int $id, float $capitalPendiente, int $plazo, string $estado): void
+    {
+        Database::conexion()
+            ->prepare('UPDATE prestamos SET capital_pendiente = ?, plazo = ?, estado = ? WHERE id = ?')
+            ->execute([self::dinero($capitalPendiente), $plazo, $estado, $id]);
+    }
+
     /** Texto con 2 decimales exactos: evita que un float como 1234.5600000001 choque con los CHECK de la tabla. */
     private static function dinero(float|int $valor): string
     {

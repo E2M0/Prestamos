@@ -5,8 +5,13 @@ import { listarClientes } from '../services/clienteService'
 import {
   calcularPrestamo, guardarPrestamo, obtenerCatalogosPrestamos, obtenerCreditoCliente, obtenerFechaPrimerPago,
 } from '../services/prestamoService'
+import {
+  calcularRenovacion, guardarRenovacion, obtenerPrestamosRenovables,
+} from '../services/renovacionService'
 import { formatoMoneda } from '../utils/formato'
-import { aPayloadApertura, aperturaVacia, esFechaReal, validarApertura } from '../utils/validacionesPrestamo'
+import {
+  aPayloadApertura, aperturaVacia, esFechaReal, validarApertura, validarRenovar,
+} from '../utils/validacionesPrestamo'
 import Alerta from '../components/Alerta'
 import Boton from '../components/Boton'
 import Campo from '../components/Campo'
@@ -18,6 +23,8 @@ import Etiqueta from '../components/Etiqueta'
 import ModalConsulta from '../components/ModalConsulta'
 import SeccionForm from '../components/SeccionForm'
 import ModalNuevoTipoPrestamo from '../components/prestamos/ModalNuevoTipoPrestamo'
+import ResumenRenovacion from '../components/renovaciones/ResumenRenovacion'
+import SeccionRenovar from '../components/renovaciones/SeccionRenovar'
 import ResumenCalculo from '../components/prestamos/ResumenCalculo'
 import TablaAmortizacion from '../components/prestamos/TablaAmortizacion'
 import '../styles/formularios.css'
@@ -38,7 +45,8 @@ const enfocarPrimerError = () =>
     campo?.focus({ preventScroll: true })
   }, 60)
 
-export default function Prestamos() {
+// modo: 'apertura' (Etapa 6-7) o 'renovacion' (Etapa 9: mismo formulario + préstamos a cancelar).
+export default function Prestamos({ modo = 'apertura' }) {
   const { datos: catalogos, cargando, error, recargar } = useApi(obtenerCatalogosPrestamos)
 
   if (cargando && !catalogos) return <Cargando texto="Cargando formulario…" />
@@ -49,10 +57,12 @@ export default function Prestamos() {
       </Alerta>
     )
   }
-  return <FormularioApertura catalogos={catalogos} alCrearTipo={recargar} />
+  return <FormularioApertura catalogos={catalogos} alCrearTipo={recargar} modo={modo} />
 }
 
-function FormularioApertura({ catalogos, alCrearTipo }) {
+function FormularioApertura({ catalogos, alCrearTipo, modo }) {
+  const renov = modo === 'renovacion'
+  const num = (n) => n + (renov ? 1 : 0) // numeración de las secciones
   const [credito, setCredito] = useState(null)
   const [form, setForm] = useState(() => aperturaVacia(catalogos.hoy))
   const [primerPagoManual, setPrimerPagoManual] = useState(false)
@@ -66,12 +76,15 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
   const [calculando, setCalculando] = useState(false)
   const [confirmarGuardar, setConfirmarGuardar] = useState(false)
   const [guardando, setGuardando] = useState(false)
+  const [renovables, setRenovables] = useState([]) // préstamos activos del cliente (solo renovación)
+  const [renovar, setRenovar] = useState([]) // [{ prestamoId, base }]
 
   const plazo = catalogos.tiposPlazo.find((p) => p.id === Number(form.tipoPlazoId))
   const cambiar = (parcial) => setForm((f) => ({ ...f, ...parcial }))
 
   // El cálculo solo vale mientras los datos no cambien: si se modifica algo, hay que calcular de nuevo.
-  const huellaActual = JSON.stringify(aPayloadApertura(form, credito))
+  const armarPayload = () => ({ ...aPayloadApertura(form, credito), ...(renov ? { renovar } : {}) })
+  const huellaActual = JSON.stringify(armarPayload())
   const calculoVigente = calculo !== null && huella === huellaActual
 
   // La fecha del primer pago se sugiere según el tipo de plazo (la calcula el servidor);
@@ -96,6 +109,8 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
     setCalculo(null)
     setHuella('')
     setCredito(null)
+    setRenovables([])
+    setRenovar([])
     setForm(aperturaVacia(catalogos.hoy))
     setPrimerPagoManual(false)
     setErrores({})
@@ -108,6 +123,10 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
     setCargandoCredito(true)
     try {
       setCredito(await obtenerCreditoCliente(fila.id))
+      if (renov) {
+        setRenovables(await obtenerPrestamosRenovables(fila.id))
+        setRenovar([])
+      }
       setErrores((e) => ({ ...e, cliente: undefined }))
     } catch (e) {
       setMensaje({ tipo: 'error', texto: e.message })
@@ -135,7 +154,11 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
 
   async function calcular() {
     setMensaje(null)
-    const nuevos = validarApertura(form, catalogos, credito)
+    const nuevos = validarApertura(form, catalogos, credito, { omitirLimite: renov })
+    if (renov) {
+      const errorRenovar = validarRenovar(renovar)
+      if (errorRenovar) nuevos.renovar = errorRenovar
+    }
     setErrores(nuevos)
     if (Object.keys(nuevos).length) {
       setCalculo(null)
@@ -146,9 +169,12 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
 
     setCalculando(true)
     try {
-      setCalculo(await calcularPrestamo(aPayloadApertura(form, credito)))
+      setCalculo(await (renov ? calcularRenovacion : calcularPrestamo)(armarPayload()))
       setHuella(huellaActual)
-      setMensaje({ tipo: 'exito', texto: 'Cálculo generado. Revise la tabla de amortización y presione Guardar.' })
+      setMensaje({
+        tipo: 'exito',
+        texto: `Cálculo generado. Revise la tabla de amortización y presione ${renov ? 'Renovar' : 'Guardar'}.`,
+      })
     } catch (e) {
       setCalculo(null)
       setErrores(e.errores || {})
@@ -162,13 +188,15 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
   async function guardar() {
     setGuardando(true)
     try {
-      const prestamo = await guardarPrestamo(aPayloadApertura(form, credito))
+      const prestamo = await (renov ? guardarRenovacion : guardarPrestamo)(armarPayload())
       const { resumen } = prestamo
       setConfirmarGuardar(false)
       nuevo()
       setMensaje({
         tipo: 'exito',
-        texto: `Préstamo ${prestamo.numero} registrado: ${formatoMoneda(resumen.monto)} en ${resumen.plazo} cuota(s). Desembolso: ${formatoMoneda(resumen.desembolso)}.`,
+        texto: renov
+          ? `Renovación registrada: préstamo nuevo ${prestamo.numero} por ${formatoMoneda(resumen.monto)}. Recibos de cancelación: ${prestamo.renovacion.recibos.map((r) => r.numero).join(', ')}. Desembolso final: ${formatoMoneda(prestamo.renovacion.desembolsoFinal)}.`
+          : `Préstamo ${prestamo.numero} registrado: ${formatoMoneda(resumen.monto)} en ${resumen.plazo} cuota(s). Desembolso: ${formatoMoneda(resumen.desembolso)}.`,
       })
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (e) {
@@ -177,7 +205,10 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
       setCalculo(null)
       setErrores(e.errores || {})
       setMensaje({ tipo: 'error', texto: e.message })
-      if (credito) obtenerCreditoCliente(credito.id).then(setCredito).catch(() => {}) // refresca el disponible
+      if (credito) {
+        obtenerCreditoCliente(credito.id).then(setCredito).catch(() => {}) // refresca el disponible
+        if (renov) obtenerPrestamosRenovables(credito.id).then(setRenovables).catch(() => {})
+      }
     } finally {
       setGuardando(false)
     }
@@ -194,13 +225,13 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
         </div>
         <div className="barra-acciones__grupo">
           <Boton variante="secundario" icono={Calculator} cargando={calculando} onClick={calcular}>Calcular</Boton>
-          <Boton icono={Save} disabled={!calculoVigente} onClick={() => setConfirmarGuardar(true)}>Guardar</Boton>
+          <Boton icono={Save} disabled={!calculoVigente} onClick={() => setConfirmarGuardar(true)}>{renov ? 'Renovar' : 'Guardar'}</Boton>
         </div>
       </div>
 
       {mensaje && <div style={{ marginBottom: 16 }}><Alerta tipo={mensaje.tipo}>{mensaje.texto}</Alerta></div>}
 
-      <SeccionForm titulo="1. Cliente" descripcion="Solo se pueden aperturar préstamos a clientes activos.">
+      <SeccionForm titulo="1. Cliente" descripcion={renov ? 'Primero elija el cliente: se consultan sus préstamos activos.' : 'Solo se pueden aperturar préstamos a clientes activos.'}>
         <div>
           <Boton variante="secundario" icono={Search} cargando={cargandoCredito} onClick={() => setConsultaAbierta(true)}>
             {credito ? 'Cambiar cliente' : 'Seleccionar cliente'}
@@ -219,14 +250,24 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
               <div><dt>Documento</dt><dd>{credito.numeroDocumento}</dd></div>
               <div><dt>Límite de crédito</dt><dd>{formatoMoneda(credito.limiteCredito)}</dd></div>
               <div><dt>Capital pendiente ({credito.prestamosActivos} activo{credito.prestamosActivos === 1 ? '' : 's'})</dt><dd>{formatoMoneda(credito.capitalPendiente)}</dd></div>
-              <div><dt>Disponible</dt><dd className="resumen-cliente__disponible">{formatoMoneda(credito.disponible)}</dd></div>
+              <div><dt>{renov ? 'Disponible (antes de cancelar)' : 'Disponible'}</dt><dd className="resumen-cliente__disponible">{formatoMoneda(credito.disponible)}</dd></div>
               <div><dt>Garante</dt><dd>{credito.garante ? credito.garante.nombreCompleto : 'Sin garante vigente'}</dd></div>
             </dl>
           </div>
         )}
       </SeccionForm>
 
-      <SeccionForm titulo="2. Condiciones del préstamo">
+      {renov && (
+        <SeccionForm titulo="2. Préstamos a renovar" descripcion="De 1 a 3 préstamos activos. Elija la base de saldo a cancelar de cada uno.">
+          {credito ? (
+            <SeccionRenovar renovables={renovables} renovar={renovar} onCambiar={setRenovar} error={errores.renovar} />
+          ) : (
+            <EstadoVacio compacto titulo="Seleccione un cliente" texto="Aquí aparecerán sus préstamos activos." />
+          )}
+        </SeccionForm>
+      )}
+
+      <SeccionForm titulo={`${num(2)}. Condiciones del préstamo${renov ? ' nuevo' : ''}`}>
         <div className="rejilla">
           <div className="campo-con-accion">
             <CampoSelect
@@ -297,7 +338,7 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
         )}
       </SeccionForm>
 
-      <SeccionForm titulo="3. Mora y seguro">
+      <SeccionForm titulo={`${num(3)}. Mora y seguro`}>
         <div className="rejilla">
           <CampoSelect
             id="prestamo-tipoMora"
@@ -334,7 +375,7 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
         </div>
       </SeccionForm>
 
-      <SeccionForm titulo="4. Gasto de cierre y fechas">
+      <SeccionForm titulo={`${num(4)}. Gasto de cierre y fechas`}>
         <div className="rejilla">
           <Campo
             id="prestamo-gastoCierre"
@@ -380,9 +421,10 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
         </div>
       </SeccionForm>
 
-      <SeccionForm titulo="5. Tabla de amortización" descripcion="Se genera al presionar Calcular. Los valores los calcula el servidor.">
+      <SeccionForm titulo={`${num(5)}. Tabla de amortización`} descripcion="Se genera al presionar Calcular. Los valores los calcula el servidor.">
         {calculoVigente ? (
           <>
+            {renov && calculo.renovacion && <ResumenRenovacion renovacion={calculo.renovacion} />}
             <ResumenCalculo resumen={calculo.resumen} />
             {calculo.resumen.soloPrimeraCuota && (
               <Alerta tipo="info">
@@ -413,13 +455,15 @@ function FormularioApertura({ catalogos, alCrearTipo }) {
 
       <ConfirmDialog
         abierto={confirmarGuardar}
-        titulo="Confirmar apertura del préstamo"
+        titulo={renov ? 'Confirmar renovación' : 'Confirmar apertura del préstamo'}
         mensaje={
           calculoVigente && credito
-            ? `Se aperturará un préstamo de ${formatoMoneda(calculo.resumen.monto)} a ${credito.nombreCompleto}, con desembolso de ${formatoMoneda(calculo.resumen.desembolso)}. Los préstamos no se eliminan una vez registrados.`
+            ? renov && calculo.renovacion
+              ? `Se cancelarán ${calculo.renovacion.prestamos.length} préstamo(s) por ${formatoMoneda(calculo.renovacion.totalSaldoCancelado)} (descuento ${formatoMoneda(calculo.renovacion.totalDescuento)}) y se aperturará un préstamo nuevo de ${formatoMoneda(calculo.resumen.monto)} a ${credito.nombreCompleto}. Desembolso final: ${formatoMoneda(calculo.renovacion.desembolsoFinal)}. Esta acción no se puede deshacer.`
+              : `Se aperturará un préstamo de ${formatoMoneda(calculo.resumen.monto)} a ${credito.nombreCompleto}, con desembolso de ${formatoMoneda(calculo.resumen.desembolso)}. Los préstamos no se eliminan una vez registrados.`
             : ''
         }
-        textoConfirmar="Aperturar préstamo"
+        textoConfirmar={renov ? 'Renovar préstamos' : 'Aperturar préstamo'}
         cargando={guardando}
         onConfirmar={guardar}
         onCancelar={() => setConfirmarGuardar(false)}

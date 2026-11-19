@@ -7,8 +7,8 @@ export const NAVEGACION = [
   { ruta: '/clientes', titulo: 'Clientes y garantes', icono: Users },
   { ruta: '/tipos-prestamo', titulo: 'Tipos de préstamo', icono: Tags },
   { ruta: '/prestamos', titulo: 'Apertura de préstamos', icono: HandCoins },
-  { ruta: '/recibos', titulo: 'Recibos de ingreso', icono: Banknote, etapa: 8 },
-  { ruta: '/renovaciones', titulo: 'Renovaciones', icono: RefreshCw, etapa: 9 },
+  { ruta: '/recibos', titulo: 'Recibos de ingreso', icono: Banknote },
+  { ruta: '/renovaciones', titulo: 'Renovaciones', icono: RefreshCw },
 ]
 
 export function tituloDePagina(pathname) {

@@ -32,7 +32,7 @@ if (!is_file($rutaConfig)) {
 }
 
 Configuracion::cargar(require $rutaConfig);
-date_default_timezone_set((string) Configuracion::obtener('zona_horaria', 'UTC'));
+date_default_timezone_set((string) Configuracion::obtener('zona_horaria', 'America/Santo_Domingo'));
 
 ManejadorErrores::registrar();
 Cors::aplicar();

@@ -110,9 +110,9 @@ final class PrestamoService
     }
 
     /** Botón Calcular: valida y devuelve la tabla de amortización y el resumen, sin guardar nada. */
-    public function calcular(array $d): array
+    public function calcular(array $d, float $capitalLiberado = 0.0): array
     {
-        return AmortizacionService::calcular($this->validar($d));
+        return AmortizacionService::calcular($this->validar($d, $capitalLiberado));
     }
 
     /**
@@ -122,29 +122,40 @@ final class PrestamoService
      */
     public function guardar(array $d, int $usuarioId): array
     {
-        return Database::transaccion(function () use ($d, $usuarioId): array {
-            $clienteId = (int) filter_var($d['clienteId'] ?? null, FILTER_VALIDATE_INT);
-            if ($clienteId > 0) {
-                $this->prestamos->bloquearCliente($clienteId);
-            }
+        return Database::transaccion(fn(): array => $this->guardarEnTransaccion($d, $usuarioId));
+    }
 
-            $datos = $this->validar($d);
-            $calculo = AmortizacionService::calcular($datos);
-            [$id, $numero] = $this->prestamos->insertar($datos, $calculo['resumen'], $usuarioId);
-            $this->prestamos->insertarCuotas($id, $calculo['cuotas']);
+    /**
+     * Cuerpo del guardado, sin abrir transacción: lo usa guardar() y la renovación, que ya tiene una transacción
+     * abierta (cancelación de los préstamos anteriores + apertura del nuevo).
+     */
+    public function guardarEnTransaccion(array $d, int $usuarioId): array
+    {
+        $clienteId = (int) filter_var($d['clienteId'] ?? null, FILTER_VALIDATE_INT);
+        if ($clienteId > 0) {
+            $this->prestamos->bloquearCliente($clienteId);
+        }
 
-            return ['id' => $id, 'numero' => $numero, 'clienteId' => $clienteId] + $calculo;
-        });
+        $datos = $this->validar($d);
+        $calculo = AmortizacionService::calcular($datos);
+        [$id, $numero] = $this->prestamos->insertar($datos, $calculo['resumen'], $usuarioId);
+        $this->prestamos->insertarCuotas($id, $calculo['cuotas']);
+
+        return ['id' => $id, 'numero' => $numero, 'clienteId' => $clienteId] + $calculo;
     }
 
     /** Valida los datos de la apertura contra los catálogos y el crédito del cliente. Lanza 422 si hay errores. */
-    private function validar(array $d): array
+    private function validar(array $d, float $capitalLiberado = 0.0): array
     {
         $clienteId = (int) filter_var($d['clienteId'] ?? null, FILTER_VALIDATE_INT);
         try {
             $credito = $clienteId > 0 ? $this->credito($clienteId) : null;
         } catch (ErrorApi) {
             $credito = null; // cliente inexistente: la validación lo reporta como "Seleccione el cliente"
+        }
+        // Renovación: el capital de los préstamos que se cancelan queda libre para el préstamo nuevo.
+        if ($credito !== null && $capitalLiberado > 0) {
+            $credito['disponible'] = round($credito['disponible'] + $capitalLiberado, 2);
         }
 
         $ctx = [

@@ -42,3 +42,17 @@ $router->get('/api/prestamos/fecha-primer-pago',  [PrestamoController::class, 'f
 // Apertura de préstamos: cálculo y guardado (Etapa 7)
 $router->post('/api/prestamos/calcular', [PrestamoController::class, 'calcular']);
 $router->post('/api/prestamos',          [PrestamoController::class, 'crear']);
+
+// Recibos de ingreso (Etapa 8)
+$router->get('/api/prestamos',                  [ReciboController::class, 'listarPrestamos']);
+$router->get('/api/prestamos/{id}/cuenta',      [ReciboController::class, 'cuenta']);
+$router->post('/api/recibos/calcular',          [ReciboController::class, 'calcular']);
+$router->post('/api/recibos',                   [ReciboController::class, 'crear']);
+$router->get('/api/recibos/{id}',               [ReciboController::class, 'obtener']);
+$router->patch('/api/recibos/{id}/formato',     [ReciboController::class, 'cambiarFormato']);
+$router->post('/api/recibos/{id}/correo',       [ReciboController::class, 'enviarCorreo']);
+
+// Renovación de préstamos (Etapa 9)
+$router->get('/api/clientes/{id}/prestamos-renovables', [RenovacionController::class, 'renovables']);
+$router->post('/api/renovaciones/calcular',             [RenovacionController::class, 'calcular']);
+$router->post('/api/renovaciones',                      [RenovacionController::class, 'crear']);
