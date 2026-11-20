@@ -15,7 +15,7 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | 7 | Cálculos de amortización, tabla virtual y guardado del préstamo | Probado |
 | 8 | Recibos de ingreso | Probado (correo sin probar: falta configurar SMTP) |
 | 9 | Renovación de préstamos | Entregado (falta tu prueba) |
-| 10 | Pruebas, documentación y presentación | Pendiente |
+| 10 | Pruebas, documentación y presentación | Entregado (falta tu revisión) |
 
 ## Funcionalidades
 
@@ -48,3 +48,7 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | Renovación: selección de 1 a 3 préstamos del cliente y base de saldo (capital / a la fecha / general) | Entregado (falta tu prueba) |
 | Renovación: saldos, descuento y desembolso final calculados en PHP | Entregado (cálculo probado con 7.200 planes simulados: sin errores; SQL Server sin probar) |
 | Renovación: recibos de cancelación, préstamos anteriores «Renovado» y préstamo nuevo en una transacción | Entregado (falta tu prueba con SQL Server) |
+| Pruebas automatizadas del cálculo (`php tests/ejecutar.php`: 301.906 verificaciones) | Probado (pasan; detectan un error introducido a propósito) |
+| Auditoría de código (consola, credenciales, SQL preparado, funciones no disponibles) | Probado |
+| Documentación: README, manual técnico, manual de usuario, plan de pruebas, guía de defensa | Entregado (falta tu revisión) |
+| Presentación para la defensa | Entregado (falta tu revisión) |
