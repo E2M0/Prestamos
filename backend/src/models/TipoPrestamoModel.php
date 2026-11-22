@@ -28,9 +28,9 @@ final class TipoPrestamoModel
             array_push($params, $patron, $patron);
         }
 
-        $sql = 'SELECT TOP (200) ' . substr($this->selectBase(), strlen('SELECT '))
+        $sql = 'SELECT ' . substr($this->selectBase(), strlen('SELECT '))
              . ($where ? ' WHERE ' . implode(' AND ', $where) : '')
-             . ' ORDER BY t.nombre';
+             . ' ORDER BY t.nombre LIMIT 200';
         $st = Database::conexion()->prepare($sql);
         $st->execute($params);
         return $st->fetchAll();
@@ -47,10 +47,10 @@ final class TipoPrestamoModel
     public function insertar(string $nombre, ?string $descripcion): int
     {
         $st = Database::conexion()->prepare(
-            "INSERT INTO tipos_prestamo (nombre, descripcion, estado) OUTPUT INSERTED.id VALUES (?, ?, N'Activo')"
+            "INSERT INTO tipos_prestamo (nombre, descripcion, estado) VALUES (?, ?, 'Activo')"
         );
         $st->execute([$nombre, $descripcion]);
-        return (int) $st->fetchColumn();
+        return (int) Database::conexion()->lastInsertId();
     }
 
     public function actualizar(int $id, string $nombre, ?string $descripcion): void

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-/** Endpoints de diagnóstico para verificar que React, PHP y SQL Server se comunican. */
+/** Endpoints de diagnóstico para verificar que React, PHP y la base de datos se comunican. */
 final class SaludController
 {
     public function ping(array $parametros): void

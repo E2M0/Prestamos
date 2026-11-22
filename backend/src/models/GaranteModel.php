@@ -8,7 +8,7 @@ final class GaranteModel
     public function vigente(int $clienteId): ?array
     {
         $st = Database::conexion()->prepare(
-            'SELECT TOP 1 id, garante_id FROM clientes_garantes WHERE cliente_id = ? AND vigente = 1'
+            'SELECT id, garante_id FROM clientes_garantes WHERE cliente_id = ? AND vigente = 1 LIMIT 1'
         );
         $st->execute([$clienteId]);
         return $st->fetch() ?: null;
@@ -38,7 +38,7 @@ final class GaranteModel
         $pdo->prepare('UPDATE clientes_garantes SET vigente = 0 WHERE cliente_id = ? AND vigente = 1')
             ->execute([$clienteId]);
         $pdo->prepare(
-            'INSERT INTO clientes_garantes (cliente_id, garante_id, vigente, usuario_creacion_id) VALUES (?, ?, 1, ?)'
+            'INSERT INTO clientes_garantes (cliente_id, garante_id, fecha_asignacion, vigente, usuario_creacion_id) VALUES (?, ?, CURDATE(), 1, ?)'
         )->execute([$clienteId, $garanteId, $usuarioId]);
     }
 }

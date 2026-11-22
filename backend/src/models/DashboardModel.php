@@ -13,23 +13,23 @@ final class DashboardModel
     {
         $sql = <<<'SQL'
 SELECT
-  (SELECT COUNT(*) FROM clientes WHERE es_cliente = 1 AND estado = N'Activo')            AS total_clientes,
-  (SELECT COUNT(*) FROM prestamos WHERE estado = N'Activo')                               AS prestamos_activos,
-  (SELECT ISNULL(SUM(monto), 0) FROM prestamos WHERE estado = N'Activo')                  AS capital_colocado,
-  (SELECT ISNULL(SUM(capital_pendiente), 0) FROM prestamos WHERE estado = N'Activo')      AS capital_pendiente,
-  (SELECT ISNULL(SUM(r.monto_recibido), 0)
+  (SELECT COUNT(*) FROM clientes WHERE es_cliente = 1 AND estado = 'Activo')            AS total_clientes,
+  (SELECT COUNT(*) FROM prestamos WHERE estado = 'Activo')                               AS prestamos_activos,
+  (SELECT IFNULL(SUM(monto), 0) FROM prestamos WHERE estado = 'Activo')                  AS capital_colocado,
+  (SELECT IFNULL(SUM(capital_pendiente), 0) FROM prestamos WHERE estado = 'Activo')      AS capital_pendiente,
+  (SELECT IFNULL(SUM(r.monto_recibido), 0)
      FROM recibos_ingreso r
-    WHERE r.estado = N'Activo'
+    WHERE r.estado = 'Activo'
       AND NOT EXISTS (SELECT 1 FROM renovaciones_detalle rd WHERE rd.recibo_id = r.id)
       AND r.fecha >= CAST(? AS DATE) AND r.fecha < CAST(? AS DATE))                       AS pagos_mes,
   (SELECT COUNT(*)
      FROM prestamos_cuotas c JOIN prestamos p ON p.id = c.prestamo_id
-    WHERE p.estado = N'Activo'
-      AND c.estado IN (N'Pendiente', N'Parcial', N'Vencida')
+    WHERE p.estado = 'Activo'
+      AND c.estado IN ('Pendiente', 'Parcial', 'Vencida')
       AND c.fecha_pago < CAST(? AS DATE))                                                 AS cuotas_vencidas,
-  (SELECT ISNULL(SUM(c.mora_acumulada - c.mora_pagada), 0)
+  (SELECT IFNULL(SUM(c.mora_acumulada - c.mora_pagada), 0)
      FROM prestamos_cuotas c JOIN prestamos p ON p.id = c.prestamo_id
-    WHERE p.estado = N'Activo')                                                           AS mora_pendiente
+    WHERE p.estado = 'Activo')                                                           AS mora_pendiente
 SQL;
         $st = Database::conexion()->prepare($sql);
         $st->execute([$inicioMes, $inicioMesSiguiente, $hoy]);
@@ -49,7 +49,7 @@ SQL;
         $sql = <<<'SQL'
 SELECT YEAR(r.fecha) AS anio, MONTH(r.fecha) AS mes, SUM(r.monto_recibido) AS total
   FROM recibos_ingreso r
- WHERE r.estado = N'Activo'
+ WHERE r.estado = 'Activo'
    AND NOT EXISTS (SELECT 1 FROM renovaciones_detalle rd WHERE rd.recibo_id = r.id)
    AND r.fecha >= CAST(? AS DATE)
  GROUP BY YEAR(r.fecha), MONTH(r.fecha)
@@ -73,21 +73,22 @@ SQL;
     public function actividadReciente(): array
     {
         $sql = <<<'SQL'
-SELECT TOP (8) a.tipo, a.fecha, a.referencia, a.cliente, a.monto
+SELECT a.tipo, a.fecha, a.referencia, a.cliente, a.monto
   FROM (
-        SELECT N'recibo' AS tipo, r.fecha AS fecha, r.numero AS referencia,
-               c.nombres + N' ' + c.apellidos AS cliente, r.monto_recibido AS monto
+        SELECT 'recibo' AS tipo, r.fecha AS fecha, r.numero AS referencia,
+               CONCAT(c.nombres, ' ', c.apellidos) AS cliente, r.monto_recibido AS monto
           FROM recibos_ingreso r
           JOIN prestamos p ON p.id = r.prestamo_id
           JOIN clientes  c ON c.id = p.cliente_id
-         WHERE r.estado = N'Activo'
+         WHERE r.estado = 'Activo'
         UNION ALL
-        SELECT N'prestamo', p.fecha_creacion, p.numero,
-               c.nombres + N' ' + c.apellidos, p.monto
+        SELECT 'prestamo', p.fecha_creacion, p.numero,
+               CONCAT(c.nombres, ' ', c.apellidos), p.monto
           FROM prestamos p
           JOIN clientes c ON c.id = p.cliente_id
        ) a
  ORDER BY a.fecha DESC
+ LIMIT 8
 SQL;
         return Database::conexion()->query($sql)->fetchAll();
     }

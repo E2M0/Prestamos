@@ -7,9 +7,9 @@ final class UsuarioModel
     public function buscarPorUsuario(string $usuario): ?array
     {
         $st = Database::conexion()->prepare(
-            'SELECT TOP 1 id, usuario, nombre, clave_hash, rol, estado
+            'SELECT id, usuario, nombre, clave_hash, rol, estado
                FROM usuarios
-              WHERE usuario = ?'
+              WHERE usuario = ? LIMIT 1'
         );
         $st->execute([$usuario]);
         return $st->fetch() ?: null;

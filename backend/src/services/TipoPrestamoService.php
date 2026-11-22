@@ -64,8 +64,8 @@ final class TipoPrestamoService
                 $this->tipos->actualizar($id, $nombre, $descripcion);
             }
         } catch (PDOException $e) {
-            // 2601 / 2627: dos guardados simultáneos con el mismo nombre
-            if (in_array((int) ($e->errorInfo[1] ?? 0), [2601, 2627], true)) {
+            // 1062 (MySQL) / 2601 / 2627 (SQL Server): dos guardados simultáneos con el mismo nombre
+            if (in_array((int) ($e->errorInfo[1] ?? 0), [1062, 2601, 2627], true)) {
                 throw new ErrorApi('Ya existe un tipo de préstamo con ese nombre.', 409, ['nombre' => 'Nombre ya registrado.']);
             }
             throw $e;

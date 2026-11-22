@@ -32,8 +32,8 @@ final class ClienteDetalleModel
     public function laboral(int $personaId): ?array
     {
         $st = Database::conexion()->prepare(
-            'SELECT TOP 1 empresa, cargo_ocupacion, tiempo_laborando, sueldo, telefono_empresa, direccion_empresa
-               FROM clientes_laborales WHERE cliente_id = ?'
+            'SELECT empresa, cargo_ocupacion, tiempo_laborando, sueldo, telefono_empresa, direccion_empresa
+               FROM clientes_laborales WHERE cliente_id = ? LIMIT 1'
         );
         $st->execute([$personaId]);
         return $st->fetch() ?: null;

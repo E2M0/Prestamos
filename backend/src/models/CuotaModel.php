@@ -41,7 +41,7 @@ final class CuotaModel
         $sql = "SELECT c.*, p.tipo_mora, p.valor_mora
                   FROM prestamos_cuotas c
                   JOIN prestamos p ON p.id = c.prestamo_id
-                 WHERE p.estado = N'Activo' AND c.estado <> N'Pagada' AND c.fecha_pago < ?";
+                 WHERE p.estado = 'Activo' AND c.estado <> 'Pagada' AND c.fecha_pago < ?";
         $params = [$hoy];
         if ($prestamoId !== null) {
             $sql .= ' AND c.prestamo_id = ?';
@@ -83,7 +83,6 @@ final class CuotaModel
             'INSERT INTO prestamos_cuotas
                 (prestamo_id, numero_cuota, fecha_pago, capital, interes, seguro, gasto_cierre, mora_acumulada,
                  valor_cuota, capital_pagado, interes_pagado, seguro_pagado, gasto_cierre_pagado, mora_pagada, balance, estado)
-             OUTPUT INSERTED.id
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $st->execute([
@@ -92,7 +91,7 @@ final class CuotaModel
             self::dinero($c['capitalPagado']), self::dinero($c['interesPagado']), self::dinero($c['seguroPagado']),
             self::dinero($c['gastoPagado']), self::dinero($c['moraPagada']), self::dinero($c['balance']), $c['estado'],
         ]);
-        return (int) $st->fetchColumn();
+        return (int) Database::conexion()->lastInsertId();
     }
 
     /** Elimina cuotas futuras sin pagos (al reducir el plazo con un abono a capital). */

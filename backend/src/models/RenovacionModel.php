@@ -8,11 +8,10 @@ final class RenovacionModel
     {
         $st = Database::conexion()->prepare(
             'INSERT INTO renovaciones (cliente_id, prestamo_nuevo_id, total_saldo_cancelado, desembolso_final, usuario_creacion_id)
-             OUTPUT INSERTED.id
              VALUES (?, ?, ?, ?, ?)'
         );
         $st->execute([$clienteId, $prestamoNuevoId, self::dinero($totalSaldo), self::dinero($desembolsoFinal), $usuarioId]);
-        return (int) $st->fetchColumn();
+        return (int) Database::conexion()->lastInsertId();
     }
 
     public function insertarDetalle(int $renovacionId, int $prestamoAnteriorId, string $base, float $montoCancelado, float $descuento, int $reciboId): void

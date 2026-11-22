@@ -8,7 +8,7 @@ final class ReciboModel
     public function insertar(int $prestamoId, array $plan, string $formato, ?string $observacion, int $usuarioId): array
     {
         $pdo = Database::conexion();
-        $numero = sprintf('RC-%06d', (int) $pdo->query('SELECT NEXT VALUE FOR seq_recibo')->fetchColumn());
+        $numero = sprintf('RC-%06d', Database::siguienteNumero('recibo'));
         $t = $plan['totales'];
 
         $st = $pdo->prepare(
@@ -16,7 +16,6 @@ final class ReciboModel
                 (numero, prestamo_id, tipo_pago, monto_recibido, total_mora, total_interes, total_seguro,
                  total_gasto_cierre, total_capital, balance_posterior, modalidad_abono, formato_impreso,
                  observacion, usuario_creacion_id)
-             OUTPUT INSERTED.id
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $st->execute([
@@ -24,7 +23,7 @@ final class ReciboModel
             self::dinero($t['interes']), self::dinero($t['seguro']), self::dinero($t['gasto']), self::dinero($t['capital']),
             self::dinero($plan['balancePosterior']), $plan['modalidad'], $formato, $observacion, $usuarioId,
         ]);
-        return [(int) $st->fetchColumn(), $numero];
+        return [(int) $pdo->lastInsertId(), $numero];
     }
 
     public function insertarDetalle(int $reciboId, ?int $cuotaId, array $d): void

@@ -7,12 +7,11 @@ declare(strict_types=1);
  */
 return [
     'db' => [
-        'servidor'            => 'NOMBRE_PC\\INSTANCIA',   // ej.: PC\SQLEXPRESS
-        'base'                => 'prestamos_db',
-        'cifrar'              => true,
-        'confiar_certificado' => true,   // solo desarrollo local
-        'usuario'             => null,   // null = Autenticación de Windows
-        'clave'               => null,
+        'servidor' => 'localhost',        // en un hosting: el "MySQL Hostname" del panel (ej.: sql123.infinityfree.com)
+        'puerto'   => 3306,
+        'base'     => 'prestamos_db',     // nombre completo de la base (en hostings lleva prefijo: if0_12345_prestamos)
+        'usuario'  => 'root',
+        'clave'    => '',
     ],
     'cors' => [
         'origenes' => ['http://localhost:5173', 'http://127.0.0.1:5173'],
