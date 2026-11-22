@@ -12,13 +12,17 @@ final class Sesion
         if (session_status() === PHP_SESSION_ACTIVE) {
             return;
         }
+        // La cookie es "secure" solo si la petición llegó por HTTPS (directo o a través de un
+        // túnel que envía X-Forwarded-Proto). En http://localhost sigue funcionando sin HTTPS.
+        $esHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
         session_name('prestamos_sid');
         session_set_cookie_params([
             'lifetime' => 0,          // se borra al cerrar el navegador
             'path'     => '/',
             'httponly' => true,
             'samesite' => 'Lax',
-            'secure'   => false,      // en producción con HTTPS debe ser true
+            'secure'   => $esHttps,   // true automáticamente cuando se usa HTTPS
         ]);
         session_start();
     }

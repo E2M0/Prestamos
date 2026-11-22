@@ -19,6 +19,34 @@ spl_autoload_register(function (string $clase): void {
     }
 });
 
+// Modo "todo en uno": si existe frontend/dist (npm run build), PHP también entrega la
+// aplicación React. Así un solo puerto (8000) sirve página y API, útil con un túnel.
+$rutaPeticion = rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+if (!str_starts_with($rutaPeticion, '/api')) {
+    $carpetaWeb = realpath(dirname(RAIZ) . '/frontend/dist');
+    if ($carpetaWeb === false) {
+        header('Content-Type: text/plain; charset=utf-8');
+        http_response_code(404);
+        echo 'No existe frontend/dist. Ejecute "npm run build" en la carpeta frontend.';
+        exit;
+    }
+    $archivo = realpath($carpetaWeb . $rutaPeticion);
+    // Solo se sirven archivos dentro de dist; cualquier otra ruta es de React Router.
+    if ($archivo === false || !is_file($archivo) || !str_starts_with($archivo, $carpetaWeb . DIRECTORY_SEPARATOR)) {
+        $archivo = $carpetaWeb . DIRECTORY_SEPARATOR . 'index.html';
+    }
+    $tipos = [
+        'html' => 'text/html; charset=utf-8', 'js' => 'text/javascript; charset=utf-8',
+        'css' => 'text/css; charset=utf-8', 'svg' => 'image/svg+xml', 'png' => 'image/png',
+        'jpg' => 'image/jpeg', 'ico' => 'image/x-icon', 'json' => 'application/json',
+        'woff' => 'font/woff', 'woff2' => 'font/woff2', 'map' => 'application/json',
+    ];
+    $extension = strtolower(pathinfo($archivo, PATHINFO_EXTENSION));
+    header('Content-Type: ' . ($tipos[$extension] ?? 'application/octet-stream'));
+    readfile($archivo);
+    exit;
+}
+
 header('Content-Type: application/json; charset=utf-8');
 
 $rutaConfig = RAIZ . '/src/config/config.php';

@@ -54,7 +54,9 @@
 }
 .tarjeta__titulo { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
 
-.estadistica { display: flex; gap: 14px; align-items: flex-start; }
+.estadistica { display: flex; gap: 14px; align-items: flex-start; container-type: inline-size; min-width: 0; }
+/* El bloque de texto puede encogerse (min-width: 0); sin esto un monto largo empuja y desborda la tarjeta. */
+.estadistica > div:last-child { min-width: 0; flex: 1 1 auto; }
 .estadistica__icono {
   width: 42px; height: 42px; border-radius: 10px;
   display: grid; place-items: center; flex: none;
@@ -63,8 +65,9 @@
 .estadistica__icono--rojo { background: var(--rojo-suave); color: var(--rojo); }
 .estadistica__icono--neutro { background: var(--gris-suave); color: var(--texto-suave); }
 .estadistica__titulo { font-size: 0.8rem; color: var(--texto-suave); }
-.estadistica__valor { font-size: 1.5rem; font-weight: 700; line-height: 1.25; margin-top: 2px; }
-.estadistica__detalle { font-size: 0.78rem; color: var(--texto-suave); margin-top: 4px; }
+/* El tamaño del monto se adapta al ancho de su propia tarjeta (cqi); nunca baja de 1rem ni pasa de 1.5rem. */
+.estadistica__valor { font-size: clamp(1rem, 7cqi, 1.5rem); font-weight: 700; line-height: 1.25; margin-top: 2px; overflow-wrap: anywhere; }
+.estadistica__detalle { overflow-wrap: anywhere; font-size: 0.78rem; color: var(--texto-suave); margin-top: 4px; }
 
 /* ---------- Alertas ---------- */
 .alerta {
