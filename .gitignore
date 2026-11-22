@@ -33,3 +33,6 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+despliegue/config.hosting.php
+publicar/
