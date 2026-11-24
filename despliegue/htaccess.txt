@@ -1,0 +1,10 @@
+# Todo lo que no sea un archivo real (JS, CSS, imágenes) pasa por index.php:
+# /api/... lo atiende PHP y el resto (/clientes, /recibos...) devuelve la aplicación React.
+DirectoryIndex index.php index.html
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
+# Nadie debe poder leer el código ni los registros directamente
+RedirectMatch 403 ^/app/
