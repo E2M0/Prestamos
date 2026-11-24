@@ -33,6 +33,8 @@ final class PrestamoService
                 'diasPeriodo'             => (int) $p['dias_periodo'],
                 'mesesPeriodo'            => (int) $p['meses_periodo'],
                 'permiteExcluirFinesSemana' => (bool) (int) $p['permite_excluir_fines_semana'],
+                'plazoMinimo'             => (int) $p['plazo_minimo'],
+                'plazoMaximo'             => (int) $p['plazo_maximo'],
             ], $this->catalogos->tiposPlazo()),
             'tiposAmortizacion' => array_map(fn(array $a) => [
                 'id' => (int) $a['id'], 'codigo' => $a['codigo'], 'nombre' => $a['nombre'],

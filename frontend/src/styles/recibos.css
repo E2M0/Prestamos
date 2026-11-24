@@ -6,6 +6,7 @@
 .vista-previa h3 { font-size: 1rem; margin: 0 0 10px; }
 .vista-previa__notas { margin: 10px 0 0; padding-left: 18px; font-size: 0.85rem; color: var(--texto); }
 .tabla__numero { text-align: right; white-space: nowrap; }
+.tabla th.tabla__numero { text-align: right; }
 .tabla__contenedor--corta { max-height: 360px; overflow: auto; }
 .texto-rojo { color: var(--rojo); font-weight: 600; }
 

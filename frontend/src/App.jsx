@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import RutaProtegida from './components/RutaProtegida'
+import RutaPorRol from './components/RutaPorRol'
 import LayoutPrincipal from './layouts/LayoutPrincipal'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -23,10 +24,13 @@ export default function App() {
         <Route element={<LayoutPrincipal />}>
           <Route index element={<Dashboard />} />
           <Route path="/clientes" element={<Clientes />} />
-          <Route path="/tipos-prestamo" element={<TiposPrestamo />} />
           <Route path="/prestamos" element={<Prestamos />} />
           <Route path="/recibos" element={<Recibos />} />
-          <Route path="/renovaciones" element={<Renovaciones />} />
+          {/* Solo Administrador: define las reglas (tipos) y autoriza condonaciones (renovaciones) */}
+          <Route element={<RutaPorRol roles={['Administrador']} />}>
+            <Route path="/tipos-prestamo" element={<TiposPrestamo />} />
+            <Route path="/renovaciones" element={<Renovaciones />} />
+          </Route>
           {NAVEGACION.filter((n) => n.etapa).map((n) => (
             <Route key={n.ruta} path={n.ruta} element={<PaginaPendiente modulo={n.titulo} etapa={n.etapa} />} />
           ))}

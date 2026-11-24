@@ -1,8 +1,10 @@
 import { NavLink } from 'react-router-dom'
 import { Landmark } from 'lucide-react'
-import { NAVEGACION } from '../utils/navegacion'
+import { NAVEGACION, puedeVer } from '../utils/navegacion'
+import useAutenticacion from '../hooks/useAutenticacion'
 
 export default function Sidebar({ abierto, onCerrar }) {
+  const { usuario } = useAutenticacion()
   return (
     <>
       <aside className={`sidebar${abierto ? ' sidebar--abierto' : ''}`}>
@@ -15,7 +17,7 @@ export default function Sidebar({ abierto, onCerrar }) {
         </div>
 
         <nav className="sidebar__nav" aria-label="Navegación principal">
-          {NAVEGACION.map(({ ruta, titulo, icono: Icono }) => (
+          {NAVEGACION.filter((n) => puedeVer(n, usuario)).map(({ ruta, titulo, icono: Icono }) => (
             <NavLink
               key={ruta}
               to={ruta}

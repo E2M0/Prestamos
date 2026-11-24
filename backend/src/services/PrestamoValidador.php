@@ -52,6 +52,13 @@ final class PrestamoValidador
         $plazoRow = $ctx['plazos'][(int) ($d['tipoPlazoId'] ?? 0)] ?? null;
         if ($plazoRow === null) {
             $e['tipoPlazoId'] = 'Seleccione el tipo de plazo.';
+        } elseif ($plazo !== false && !isset($e['plazo'])) {
+            // Rango de cuotas por tipo de plazo (tipos_plazo.plazo_minimo / plazo_maximo).
+            $minimo = (int) ($plazoRow['plazo_minimo'] ?? 1);
+            $maximo = (int) ($plazoRow['plazo_maximo'] ?? self::MAX_CUOTAS);
+            if ($plazo < $minimo || $plazo > $maximo) {
+                $e['plazo'] = 'El plazo ' . $plazoRow['nombre'] . ' permite de ' . $minimo . ' a ' . $maximo . ' cuotas.';
+            }
         }
         $amortizacion = $ctx['amortizaciones'][(int) ($d['tipoAmortizacionId'] ?? 0)] ?? null;
         if ($amortizacion === null) {

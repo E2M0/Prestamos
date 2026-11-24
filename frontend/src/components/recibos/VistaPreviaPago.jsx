@@ -21,23 +21,26 @@ export default function VistaPreviaPago({ previa, plazoActual }) {
         <table className="tabla">
           <thead>
             <tr>
-              <th>Cuota</th><th>Mora</th><th>Interés</th><th>Seguro</th><th>Gasto cierre</th><th>Capital</th><th>Queda</th>
+              <th>No.</th><th>Fecha de pago</th>
+              <th className="tabla__numero">Mora</th><th className="tabla__numero">Interés</th><th className="tabla__numero">Seguro</th>
+              <th className="tabla__numero">Gasto cierre</th><th className="tabla__numero">Capital</th><th className="tabla__numero">Queda</th>
             </tr>
           </thead>
           <tbody>
             {previa.detalle.map((d, i) => (
               <tr key={i}>
-                <td>{d.cuotaNumero === null ? 'Abono a capital' : `${d.cuotaNumero} · ${formatoFecha(d.fechaPago)}`}</td>
+                <td>{d.cuotaNumero === null ? '—' : d.cuotaNumero}</td>
+                <td>{d.cuotaNumero === null ? 'Abono a capital' : formatoFecha(d.fechaPago)}</td>
                 <td className="tabla__numero">{formatoMoneda(d.mora)}</td>
                 <td className="tabla__numero">{formatoMoneda(d.interes)}</td>
                 <td className="tabla__numero">{formatoMoneda(d.seguro)}</td>
                 <td className="tabla__numero">{formatoMoneda(d.gasto)}</td>
                 <td className="tabla__numero">{formatoMoneda(d.capital)}</td>
-                <td>{d.estadoResultante ? <Etiqueta estado={d.estadoResultante} /> : '—'}</td>
+                <td className="tabla__numero">{d.estadoResultante ? <Etiqueta estado={d.estadoResultante} /> : '—'}</td>
               </tr>
             ))}
             <tr className="cobro__total">
-              <td>Total</td>
+              <td colSpan={2}>Total</td>
               <td className="tabla__numero">{formatoMoneda(previa.totales.mora)}</td>
               <td className="tabla__numero">{formatoMoneda(previa.totales.interes)}</td>
               <td className="tabla__numero">{formatoMoneda(previa.totales.seguro)}</td>

@@ -57,7 +57,11 @@ export function validarApertura(f, cat, credito, { omitirLimite = false } = {}) 
   const tasa = numero(f.tasa)
   if (tasa === null || tasa < 0 || tasa > MAX_TASA) e.tasa = `Ingrese una tasa mensual entre 0 y ${MAX_TASA}.`
 
-  if (!cat.tiposPlazo.some((p) => p.id === Number(f.tipoPlazoId))) e.tipoPlazoId = 'Seleccione el tipo de plazo.'
+  const tipoPlazo = cat.tiposPlazo.find((p) => p.id === Number(f.tipoPlazoId))
+  if (!tipoPlazo) e.tipoPlazoId = 'Seleccione el tipo de plazo.'
+  else if (!e.plazo && (plazo < tipoPlazo.plazoMinimo || plazo > tipoPlazo.plazoMaximo)) {
+    e.plazo = `El plazo ${tipoPlazo.nombre} permite de ${tipoPlazo.plazoMinimo} a ${tipoPlazo.plazoMaximo} cuotas.`
+  }
   if (!cat.tiposAmortizacion.some((a) => a.id === Number(f.tipoAmortizacionId))) {
     e.tipoAmortizacionId = 'Seleccione el tipo de amortización.'
   }

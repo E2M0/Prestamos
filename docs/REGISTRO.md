@@ -52,3 +52,6 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | Auditoría de código (consola, credenciales, SQL preparado, funciones no disponibles) | Probado |
 | Documentación: README, manual técnico, manual de usuario, plan de pruebas, guía de defensa | Entregado (falta tu revisión) |
 | Presentación para la defensa | Entregado (falta tu revisión) |
+| Versión MySQL para publicar (scripts, backend adaptado, `publicar.ps1`, guía de hosting) | Entregado, **sin probar contra un MySQL real** |
+| Permisos por rol (Administrador / Cajero) en API y menú | Entregado (falta tu prueba con ambos usuarios) |
+| Rango de cuotas por tipo de plazo (`plazo_minimo` / `plazo_maximo`) | Entregado (probado en validación automática; falta tu prueba en pantalla) |

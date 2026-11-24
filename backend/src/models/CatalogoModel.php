@@ -22,7 +22,8 @@ final class CatalogoModel
     public function tiposPlazo(): array
     {
         return Database::conexion()
-            ->query('SELECT id, nombre, dias_periodo, meses_periodo, permite_excluir_fines_semana
+            ->query('SELECT id, nombre, dias_periodo, meses_periodo, permite_excluir_fines_semana,
+                            plazo_minimo, plazo_maximo
                        FROM tipos_plazo ORDER BY dias_periodo, id')
             ->fetchAll();
     }

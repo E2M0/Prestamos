@@ -12,6 +12,7 @@ $suites = [
     'Casos con resultados calculados a mano' => __DIR__ . '/casos_manuales.php',
     'Pagos aleatorios (reglas contables)' => __DIR__ . '/propiedades_pagos.php',
     'Cancelación por renovación (tres bases de saldo)' => __DIR__ . '/propiedades_cancelacion.php',
+    'Límite de cuotas por tipo de plazo' => __DIR__ . '/limites_plazo.php',
 ];
 
 $inicio = microtime(true);

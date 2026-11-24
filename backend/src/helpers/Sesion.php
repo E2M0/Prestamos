@@ -58,4 +58,18 @@ final class Sesion
         }
         return $usuario;
     }
+
+    /**
+     * Para operaciones que solo puede hacer cierto rol (ej.: 'Administrador'). Exige sesión (401)
+     * y, si el rol del usuario no está permitido, responde 403. Es la protección real:
+     * ocultar un botón en React no impide llamar a la API.
+     */
+    public static function requerirRol(string ...$roles): array
+    {
+        $usuario = self::requerir();
+        if (!in_array($usuario['rol'] ?? '', $roles, true)) {
+            Respuesta::error('No tiene permiso para realizar esta operación.', 403);
+        }
+        return $usuario;
+    }
 }
