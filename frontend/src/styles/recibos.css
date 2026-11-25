@@ -6,6 +6,7 @@
 .vista-previa h3 { font-size: 1rem; margin: 0 0 10px; }
 .vista-previa__notas { margin: 10px 0 0; padding-left: 18px; font-size: 0.85rem; color: var(--texto); }
 .tabla__numero { text-align: right; white-space: nowrap; }
+/* .tabla th fuerza text-align:left con más especificidad; este selector la supera para los títulos numéricos */
 .tabla th.tabla__numero { text-align: right; }
 .tabla__contenedor--corta { max-height: 360px; overflow: auto; }
 .texto-rojo { color: var(--rojo); font-weight: 600; }
@@ -19,28 +20,86 @@
 .recibo-vista { background: var(--gris-suave); padding: 16px; border-radius: 10px; display: flex; justify-content: center; overflow: auto; }
 
 /* ---------- Papel del recibo (pantalla e impresión) ---------- */
-.recibo-papel { background: #fff; color: #111; font-size: 13px; line-height: 1.4; padding: 18px; box-shadow: var(--sombra); }
-.recibo-papel--a4 { width: 100%; max-width: 640px; }
+.recibo-papel {
+  --r-verde: #059669; --r-verde-oscuro: #047857; --r-verde-suave: #d1fae5; --r-verde-fondo: #ecfdf5;
+  --r-dorado: #c59b27; --r-borde: #e5e7eb; --r-gris: #6b7280;
+  background: #fff; color: #1f2937; font-size: 13px; line-height: 1.45; padding: 18px; box-shadow: var(--sombra);
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.recibo-papel--a4 { width: 100%; max-width: 720px; padding: 32px; border-top: 6px solid var(--r-verde); border-bottom: 4px solid var(--r-dorado); border-radius: 10px; }
 .recibo-papel--pos { width: 302px; max-width: 100%; font-size: 11px; padding: 10px; }
-.recibo-papel__cabecera { text-align: center; border-bottom: 1px dashed #888; padding-bottom: 8px; margin-bottom: 8px; position: relative; }
-.recibo-papel__cabecera h1 { font-size: 1.25em; margin: 0; }
-.recibo-papel__cabecera p { margin: 2px 0; color: #444; }
-.recibo-papel__anulado { display: inline-block; margin-top: 4px; border: 2px solid #b91c1c; color: #b91c1c; padding: 0 8px; font-weight: 700; }
-.recibo-papel__datos, .recibo-papel__totales { margin: 0 0 8px; }
+
+.recibo-papel__cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-bottom: 18px; border-bottom: 1.5px solid var(--r-borde); }
+.recibo-papel__marca { display: flex; align-items: center; gap: 14px; }
+.recibo-papel__logo { width: 64px; height: 64px; object-fit: contain; }
+.recibo-papel__cabecera h1 { font-size: 1.7em; margin: 0; letter-spacing: 1px; color: var(--r-verde-oscuro); }
+.recibo-papel__lema { margin: 2px 0 0; font-size: 0.85em; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--r-dorado); }
+.recibo-papel__meta { text-align: right; position: relative; }
+.recibo-papel__meta h2 { margin: 0; font-size: 1.45em; text-transform: uppercase; letter-spacing: 1px; color: var(--r-verde); }
+.recibo-papel__numero { display: inline-block; margin-top: 6px; padding: 3px 12px; background: var(--r-verde-fondo); color: var(--r-verde-oscuro); border: 1px solid var(--r-verde-suave); border-left: 3px solid var(--r-verde); border-radius: 6px; }
+.recibo-papel__fecha { margin: 8px 0 0; font-size: 0.92em; color: var(--r-gris); }
+.recibo-papel__anulado { display: inline-block; margin-top: 6px; border: 2px solid #b91c1c; color: #b91c1c; padding: 0 8px; font-weight: 700; }
+
+.recibo-papel__bloques { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 22px 0; }
+.recibo-papel__bloques h3 { margin: 0 0 8px; padding-bottom: 4px; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.8px; color: var(--r-verde-oscuro); border-bottom: 1.5px solid var(--r-verde-suave); }
+.recibo-papel__datos, .recibo-papel__totales { margin: 0; }
 .recibo-papel__datos div, .recibo-papel__totales div { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
-.recibo-papel__datos dt, .recibo-papel__totales dt { color: #555; }
+.recibo-papel__datos dt, .recibo-papel__totales dt { color: var(--r-gris); }
 .recibo-papel__datos dd, .recibo-papel__totales dd { margin: 0; text-align: right; font-weight: 600; }
-.recibo-papel__tabla { width: 100%; border-collapse: collapse; margin: 8px 0; }
-.recibo-papel__tabla th { text-align: left; border-bottom: 1px solid #888; padding: 3px 0; }
-.recibo-papel__tabla th:last-child, .recibo-papel__tabla td:last-child { text-align: right; }
-.recibo-papel__tabla td { padding: 3px 0; border-bottom: 1px dotted #ccc; }
-.recibo-papel__tabla small { color: #666; }
-.recibo-papel__totales { border-top: 1px dashed #888; padding-top: 6px; }
-.recibo-papel__total { font-size: 1.15em; border-top: 1px solid #111; margin-top: 4px; padding-top: 4px !important; }
-.recibo-papel__total dt, .recibo-papel__total dd { color: #111 !important; font-weight: 700 !important; }
-.recibo-papel__obs { font-size: 0.9em; color: #444; }
-.recibo-papel__pie { text-align: center; border-top: 1px dashed #888; margin-top: 10px; padding-top: 6px; color: #555; }
+
+.recibo-papel__tabla { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.recibo-papel__tabla thead th { background: var(--r-verde); color: #fff; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.6px; padding: 9px 12px; text-align: left; }
+.recibo-papel__tabla thead th:last-child, .recibo-papel__tabla td:last-child { text-align: right; }
+.recibo-papel__tabla td { padding: 9px 12px; border-bottom: 1px solid var(--r-borde); }
+.recibo-papel__tabla tbody tr:nth-child(even) { background: #f3f4f6; }
+.recibo-papel__tabla small { color: var(--r-gris); }
+
+.recibo-papel__resumen { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-top: 20px; }
+.recibo-papel__obs { flex: 1; font-size: 0.95em; background: var(--r-verde-fondo); padding: 10px 12px; border: 1px solid var(--r-verde-suave); border-left: 3px solid var(--r-verde); border-radius: 8px; }
+.recibo-papel__obs strong { display: block; margin-bottom: 4px; color: var(--r-verde-oscuro); }
+.recibo-papel__totales { width: 260px; }
+.recibo-papel__totales div { border-bottom: 1px solid var(--r-borde); padding: 6px 0; }
+.recibo-papel__total { border-bottom: none !important; border-top: 2px solid var(--r-verde); margin-top: 4px; padding-top: 9px !important; font-size: 1.2em; }
+.recibo-papel__total dt, .recibo-papel__total dd { color: var(--r-verde-oscuro) !important; font-weight: 700 !important; }
+
+.recibo-papel__pie { margin-top: 30px; padding-top: 14px; border-top: 1px dashed #d1d5db; text-align: center; color: var(--r-gris); font-size: 0.92em; }
 .recibo-papel__pie p { margin: 2px 0; }
+.recibo-papel__pie .recibo-papel__gracias { color: var(--r-verde); font-weight: 600; font-size: 1.05em; }
+
+/* Rollo POS 80 mm: una sola columna, sin colores de fondo y en blanco y negro */
+.recibo-papel--pos .recibo-papel__marca { flex-direction: column; gap: 4px; }
+.recibo-papel--pos .recibo-papel__logo { width: 48px; height: 48px; filter: grayscale(1) contrast(1.3); }
+.recibo-papel--pos .recibo-papel__lema { font-size: 0.8em; letter-spacing: 0.8px; }
+.recibo-papel--pos .recibo-papel__gracias { font-size: 1em; }
+.recibo-papel--pos .recibo-papel__tabla small { display: block; }
+.recibo-papel--pos .recibo-papel__cabecera { flex-direction: column; align-items: center; text-align: center; gap: 4px; border-bottom: 1px dashed #888; padding-bottom: 8px; }
+.recibo-papel--pos .recibo-papel__marca { justify-content: center; }
+.recibo-papel--pos .recibo-papel__cabecera h1 { font-size: 1.3em; color: #111; letter-spacing: 0; }
+.recibo-papel--pos .recibo-papel__lema, .recibo-papel--pos .recibo-papel__meta h2, .recibo-papel--pos .recibo-papel__bloques h3 { color: #111; }
+.recibo-papel--pos .recibo-papel__meta { text-align: center; }
+.recibo-papel--pos .recibo-papel__meta h2 { font-size: 1.1em; }
+.recibo-papel--pos .recibo-papel__numero { background: none; border: 0; padding: 0; color: #111; }
+.recibo-papel--pos .recibo-papel__bloques { grid-template-columns: 1fr; gap: 8px; margin: 8px 0; }
+.recibo-papel--pos .recibo-papel__bloques h3 { border-bottom: 1px solid #888; }
+.recibo-papel--pos .recibo-papel__tabla thead th { background: none; color: #111; border-bottom: 1px solid #888; padding: 3px 0; }
+.recibo-papel--pos .recibo-papel__tabla td { padding: 3px 0; border-bottom: 1px dotted #ccc; }
+.recibo-papel--pos .recibo-papel__tabla tbody tr:nth-child(even) { background: none; }
+.recibo-papel--pos .recibo-papel__resumen { flex-direction: column; gap: 6px; margin-top: 8px; }
+.recibo-papel--pos .recibo-papel__obs { width: 100%; background: none; border: 0; border-left: 0; padding: 0; }
+.recibo-papel--pos .recibo-papel__totales { width: 100%; }
+.recibo-papel--pos .recibo-papel__totales div { border-bottom: 0; padding: 2px 0; }
+.recibo-papel--pos .recibo-papel__total { border-top: 1px solid #111; }
+.recibo-papel--pos .recibo-papel__total dt, .recibo-papel--pos .recibo-papel__total dd { color: #111 !important; }
+.recibo-papel--pos .recibo-papel__pie { margin-top: 8px; border-top: 1px dashed #888; padding-top: 6px; }
+.recibo-papel--pos .recibo-papel__pie .recibo-papel__gracias { color: #111; }
+
+@media (max-width: 560px) {
+  .recibo-papel--a4 { padding: 18px; }
+  .recibo-papel--a4 .recibo-papel__cabecera, .recibo-papel--a4 .recibo-papel__resumen { flex-direction: column; }
+  .recibo-papel--a4 .recibo-papel__meta { text-align: left; }
+  .recibo-papel--a4 .recibo-papel__bloques { grid-template-columns: 1fr; }
+  .recibo-papel--a4 .recibo-papel__totales { width: 100%; }
+}
 
 /* ---------- Impresión: solo se imprime el recibo ---------- */
 .zona-impresion { display: none; }
@@ -48,5 +107,8 @@
   #root { display: none !important; }
   .zona-impresion { display: block !important; }
   .zona-impresion .recibo-papel { box-shadow: none; max-width: none; margin: 0 auto; }
+  .zona-impresion .recibo-papel--a4 { padding: 6px 0 0; }
+  .zona-impresion .recibo-papel--a4 .recibo-papel__cabecera, .zona-impresion .recibo-papel--a4 .recibo-papel__resumen { flex-direction: row; }
+  .zona-impresion .recibo-papel--a4 .recibo-papel__bloques { grid-template-columns: 1fr 1fr; }
   body { background: #fff !important; }
 }

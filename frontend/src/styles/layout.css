@@ -17,8 +17,10 @@
   border-bottom: 1px solid var(--borde);
 }
 .sidebar__marca svg { color: var(--esmeralda); flex: none; }
+.sidebar__marca .logo-empresa { width: 40px; height: 40px; object-fit: contain; flex: none; }
+.sidebar__marca span { text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; color: #c59b27; }
 .sidebar__marca strong { display: block; font-size: 1rem; line-height: 1.2; }
-.sidebar__marca span { display: block; font-size: 0.72rem; color: var(--texto-suave); }
+.sidebar__marca span { display: block; font-size: 0.72rem; }
 
 .sidebar__nav { display: flex; flex-direction: column; gap: 2px; padding: 14px 12px; flex: 1; overflow-y: auto; }
 .sidebar__enlace {

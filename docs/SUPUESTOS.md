@@ -18,8 +18,9 @@ documentadas y se apliquen de forma consistente. Estas son las del proyecto hast
    Se valida el formato, no el dígito verificador.
 7. Teléfonos con formato `809-000-0000`, máximo 5 por persona y exactamente uno principal.
 8. Correo electrónico opcional (el recibo puede enviarse a un correo digitado manualmente).
-9. Las **tres referencias personales son obligatorias** y los **familiares son opcionales**
-   (el enunciado marca ambos como opcionales en 3.1, pero exige las tres referencias para guardar).
+9. Las **referencias personales** (hasta tres) y los **familiares** son **opcionales**, como marca el punto 3.1 del enunciado
+   (que en otro párrafo menciona «las tres referencias» como requisito; se siguió la marca OPCIONAL, a petición del estudiante).
+   Una fila vacía se ignora; si se llena nombre o teléfono, ambos son obligatorios. Se validan en PHP y en React.
 10. Se exige mayoría de edad (18 años) al cliente y al garante.
 11. Clasificación del cliente: A (Excelente), B (Bueno), C (Regular).
 12. Un cliente con préstamos activos no puede inactivarse.
@@ -119,3 +120,4 @@ Todo el cálculo está en PHP (`AmortizacionService`); React solo muestra lo que
 54. **Versión para publicar en MySQL.** El estudiante no puede llevar su equipo a la corrección, así que se publicará en un hosting gratuito; según informó, el profesor aceptó MySQL. Se mantiene la versión SQL Server en `database/` y se agrega `database/mysql/` y el backend adaptado (ver `docs/PUBLICAR_EN_HOSTING.md`). La adaptación no se ha probado contra un MySQL real.
 55. **Permisos por rol.** El **Cajero** opera el día a día (dashboard, clientes y garantes, apertura de préstamos y recibos de ingreso; puede consultar los tipos de préstamo al abrir un préstamo). El **Administrador** además define las reglas y autoriza lo delicado: crear/editar/desactivar tipos de préstamo y hacer renovaciones (que pueden condonar montos). Se exige en la API (403 «No tiene permiso…», `Sesion::requerirRol`) y además se oculta del menú y de las rutas de React. No hay pantalla de gestión de usuarios.
 56. **Rango de cuotas por tipo de plazo.** La tabla `tipos_plazo` tiene `plazo_minimo` y `plazo_maximo` (Diario 15–365, Interdiario 10–180, Semanal 4–156, Intersemanal 2–130, Quincenal 2–120, Mensual 1–120, Trimestral 1–40, Semestral 1–20, Anual 1–15). Se valida en PHP (`PrestamoValidador`) y en React, y aplica también a los préstamos creados por renovación. Los valores se cambian con `UPDATE`; no hay pantalla para editarlos. Los préstamos ya existentes no se modifican.
+57. **Reglas de negocio en la base (`reglas_negocio`).** Para que no entren datos poco realistas, se validan en PHP (y se avisa antes en React) estos límites, guardados como clave/valor y editables con `UPDATE`: tasa mensual 0.5–10 %, monto mínimo RD$1,000, mora en porcentaje máx. 10 % de la cuota, mora fija máx. 5 % del monto, seguro total máx. 10 % del monto, gasto de cierre máx. 10 % del monto e interés total máx. 100 % del capital (este último se comprueba en el servidor tras calcular la tabla; con amortización de saldo fijo solo se conoce la primera cuota, así que el control es más débil). Si una regla no existe, no hay límite. Los valores son propuestos por el desarrollador, no vienen del enunciado.

@@ -13,6 +13,8 @@ $suites = [
     'Pagos aleatorios (reglas contables)' => __DIR__ . '/propiedades_pagos.php',
     'Cancelación por renovación (tres bases de saldo)' => __DIR__ . '/propiedades_cancelacion.php',
     'Límite de cuotas por tipo de plazo' => __DIR__ . '/limites_plazo.php',
+    'Reglas de negocio' => __DIR__ . '/reglas_negocio.php',
+    'Referencias personales opcionales' => __DIR__ . '/referencias_opcionales.php',
 ];
 
 $inicio = microtime(true);

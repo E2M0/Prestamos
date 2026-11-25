@@ -10,7 +10,8 @@ declare(strict_types=1);
 
 // Diagnóstico (Etapa 3)
 $router->get('/api/ping',  [SaludController::class, 'ping']);   // API viva, sin base de datos
-$router->get('/api/salud', [SaludController::class, 'salud']);  // API + conexión a SQL Server
+$router->get('/api/salud', [SaludController::class, 'salud']);  // API + conexión a la base de datos
+$router->get('/api/empresa', [EmpresaController::class, 'datos']); // nombre y lema de la empresa (público)
 
 // Sesión (Etapa 4)
 $router->post('/api/auth/login',  [AuthController::class, 'login']);

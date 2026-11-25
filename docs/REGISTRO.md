@@ -29,7 +29,7 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | Componentes base (Boton, Etiqueta, Alerta, Campo, Cargando, EstadoVacio...) | Probado |
 | Modal, ModalConsulta (buscador + lista), Tabla, ConfirmDialog, CampoSelect, SeccionForm | Probado |
 | Clientes: registrar, modificar (modal de consulta), activar / inactivar | Probado |
-| Teléfonos, datos laborales, familiares y 3 referencias | Probado |
+| Teléfonos, datos laborales, familiares y referencias (estas dos últimas opcionales) | Probado |
 | Garante: búsqueda por documento, carga automática, alta nueva, edición | Probado |
 | Búsqueda inversa (cliente que ya es garante) sin duplicar la persona | Probado |
 | Validación de documentos con expresiones regulares (React y PHP) | Probado |
@@ -55,3 +55,4 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | Versión MySQL para publicar (scripts, backend adaptado, `publicar.ps1`, guía de hosting) | Entregado, **sin probar contra un MySQL real** |
 | Permisos por rol (Administrador / Cajero) en API y menú | Entregado (falta tu prueba con ambos usuarios) |
 | Rango de cuotas por tipo de plazo (`plazo_minimo` / `plazo_maximo`) | Entregado (probado en validación automática; falta tu prueba en pantalla) |
+| Reglas de negocio (`reglas_negocio`): tasa, monto mínimo, mora, seguro, gasto de cierre e interés total | Entregado (probado en validación automática; falta tu prueba en pantalla y ejecutar `05_reglas_negocio.sql`) |

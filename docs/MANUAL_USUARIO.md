@@ -15,7 +15,7 @@ Seis indicadores (clientes activos, préstamos activos, capital colocado, pagos 
 gráficos y la actividad reciente. Al abrirlo, la mora de las cuotas vencidas se actualiza a la fecha de hoy.
 
 ## Clientes y garantes
-1. **Nuevo cliente:** complete datos personales, teléfonos, datos laborales, familiares (opcionales) y **tres referencias**.
+1. **Nuevo cliente:** complete datos personales, teléfonos, datos laborales, y, si desea, familiares y hasta **tres referencias** (ambos opcionales).
    El número de documento se valida según su tipo (cédula, pasaporte, RNC…).
 2. **Garante:** escriba su documento. Si ya existe, sus datos se cargan solos; si no, se registra una persona nueva. Una persona
    que ya es cliente puede ser garante sin duplicarse.

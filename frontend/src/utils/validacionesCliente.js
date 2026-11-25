@@ -98,8 +98,9 @@ export function validarCliente(form, cat) {
   }
   if (!cat.clasificaciones.includes(form.clasificacion)) e.clasificacion = 'Seleccione la clasificación del cliente.'
 
-  // Referencias: tres obligatorias
+  // Referencias: opcionales; una fila vacía se ignora y, si se llena algo, nombre y teléfono son obligatorios
   form.referencias.forEach((r, i) => {
+    if (!limpio(r.nombre) && !r.telefono.trim()) return
     if (limpio(r.nombre).length < 2) e[`referencias.${i}.nombre`] = 'Ingrese el nombre.'
     if (!PATRON_TELEFONO.test(r.telefono)) e[`referencias.${i}.telefono`] = 'Use el formato 809-000-0000.'
   })

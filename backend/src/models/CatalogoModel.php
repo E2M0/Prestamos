@@ -28,6 +28,16 @@ final class CatalogoModel
             ->fetchAll();
     }
 
+    /** Reglas de negocio (tabla reglas_negocio) como mapa clave => valor. */
+    public function reglas(): array
+    {
+        $mapa = [];
+        foreach (Database::conexion()->query('SELECT clave, valor FROM reglas_negocio')->fetchAll() as $fila) {
+            $mapa[$fila['clave']] = (float) $fila['valor'];
+        }
+        return $mapa;
+    }
+
     public function tiposAmortizacion(): array
     {
         return Database::conexion()

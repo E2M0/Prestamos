@@ -36,6 +36,7 @@ final class PrestamoService
                 'plazoMinimo'             => (int) $p['plazo_minimo'],
                 'plazoMaximo'             => (int) $p['plazo_maximo'],
             ], $this->catalogos->tiposPlazo()),
+            'reglas' => $this->catalogos->reglas(),
             'tiposAmortizacion' => array_map(fn(array $a) => [
                 'id' => (int) $a['id'], 'codigo' => $a['codigo'], 'nombre' => $a['nombre'],
             ], $this->catalogos->tiposAmortizacion()),
@@ -114,7 +115,19 @@ final class PrestamoService
     /** Botón Calcular: valida y devuelve la tabla de amortización y el resumen, sin guardar nada. */
     public function calcular(array $d, float $capitalLiberado = 0.0): array
     {
-        return AmortizacionService::calcular($this->validar($d, $capitalLiberado));
+        $datos = $this->validar($d, $capitalLiberado);
+        $calculo = AmortizacionService::calcular($datos);
+        $this->verificarInteresTotal($datos, $calculo);
+        return $calculo;
+    }
+
+    /** Regla de negocio: el interés total no puede pasar de cierto % del capital (reglas_negocio). */
+    private function verificarInteresTotal(array $datos, array $calculo): void
+    {
+        $error = PrestamoValidador::errorInteresTotal($this->catalogos->reglas(), (float) $datos['monto'], (float) $calculo['resumen']['totalIntereses']);
+        if ($error !== null) {
+            throw new ErrorApi('Revise los datos del préstamo.', 422, ['tasa' => $error]);
+        }
     }
 
     /**
@@ -140,6 +153,7 @@ final class PrestamoService
 
         $datos = $this->validar($d);
         $calculo = AmortizacionService::calcular($datos);
+        $this->verificarInteresTotal($datos, $calculo);
         [$id, $numero] = $this->prestamos->insertar($datos, $calculo['resumen'], $usuarioId);
         $this->prestamos->insertarCuotas($id, $calculo['cuotas']);
 
@@ -164,6 +178,7 @@ final class PrestamoService
             'credito'        => $credito,
             'plazos'         => array_column($this->catalogos->tiposPlazo(), null, 'id'),
             'amortizaciones' => array_column($this->catalogos->tiposAmortizacion(), null, 'id'),
+            'reglas'         => $this->catalogos->reglas(),
             'tiposPrestamo'  => array_fill_keys(
                 array_map('intval', array_column($this->tipos->listar(['estado' => 'Activo']), 'id')),
                 true

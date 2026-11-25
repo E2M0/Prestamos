@@ -292,7 +292,7 @@ function FormularioApertura({ catalogos, alCrearTipo, modo }) {
           />
           <Campo
             id="prestamo-plazo"
-            etiqueta={plazo ? `Plazo (cuotas, de ${plazo.plazoMinimo} a ${plazo.plazoMaximo})` : 'Plazo (cantidad de cuotas)'}
+            etiqueta={plazo?.plazoMinimo != null && plazo?.plazoMaximo != null ? `Plazo (cuotas, de ${plazo.plazoMinimo} a ${plazo.plazoMaximo})` : 'Plazo (cantidad de cuotas)'}
             type="number" min={plazo?.plazoMinimo ?? 1} max={plazo?.plazoMaximo} step="1"
             value={form.plazo}
             error={errores.plazo}

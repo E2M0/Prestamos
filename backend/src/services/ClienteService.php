@@ -232,8 +232,8 @@ final class ClienteService
                 return $clienteId;
             });
         } catch (PDOException $e) {
-            // 2601 / 2627: violación de índice o restricción UNIQUE (por ejemplo, dos guardados simultáneos)
-            if (in_array((int) ($e->errorInfo[1] ?? 0), [2601, 2627], true)) {
+            // 1062 (MySQL) / 2601 / 2627 (SQL Server): violación de índice o restricción UNIQUE (por ejemplo, dos guardados simultáneos)
+            if (in_array((int) ($e->errorInfo[1] ?? 0), [1062, 2601, 2627], true)) {
                 throw new ErrorApi('Ya existe un registro con ese documento.', 409);
             }
             throw $e;
@@ -366,9 +366,10 @@ final class ClienteService
 
     private function referencias(array $lista): array
     {
+        $llenas = array_filter(array_values($lista), fn($r) => is_array($r) && !ClienteValidador::referenciaVacia($r));
         return array_map(fn(array $r) => [
             'nombre'   => ClienteValidador::limpiar($r['nombre']),
             'telefono' => ClienteValidador::texto($r['telefono']),
-        ], array_values($lista));
+        ], array_values($llenas));
     }
 }

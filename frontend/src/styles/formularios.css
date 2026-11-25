@@ -71,3 +71,20 @@
 .casilla--alta { min-height: 42px; }
 .campo__etiqueta-falsa { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
 .enlace-boton { background: none; border: none; padding: 4px 0 0; color: var(--esmeralda-oscuro); font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
+
+/* ---------- Pestañas dentro de un formulario ---------- */
+.pestanas {
+  display: flex; gap: 4px; margin-bottom: 16px; overflow-x: auto;
+  border-bottom: 1px solid var(--borde);
+}
+.pestanas__boton {
+  position: relative; flex: 0 0 auto; padding: 10px 16px; background: none; border: 0;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer;
+  font: inherit; font-weight: 500; color: var(--texto-suave); white-space: nowrap;
+}
+.pestanas__boton:hover { color: var(--texto); }
+.pestanas__boton--activa { color: var(--esmeralda-oscuro); border-bottom-color: var(--esmeralda); }
+.pestanas__error {
+  display: inline-block; width: 8px; height: 8px; margin-left: 8px;
+  border-radius: 50%; background: var(--rojo); vertical-align: middle;
+}

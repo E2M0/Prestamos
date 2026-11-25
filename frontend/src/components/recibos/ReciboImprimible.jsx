@@ -11,29 +11,56 @@ export default function ReciboImprimible({ recibo, formato }) {
     ['Capital', recibo.totalCapital],
   ].filter(([, v]) => v > 0)
 
+  const esPos = formato === 'POS80'
+  const saldo = recibo.balancePosterior
+
   return (
-    <article className={`recibo-papel recibo-papel--${formato === 'POS80' ? 'pos' : 'a4'}`}>
+    <article className={`recibo-papel recibo-papel--${esPos ? 'pos' : 'a4'}`}>
       <header className="recibo-papel__cabecera">
-        <h1>{recibo.empresa}</h1>
-        <p>Recibo de ingreso</p>
-        <strong>{recibo.numero}</strong>
-        {recibo.estado === 'Anulado' && <span className="recibo-papel__anulado">ANULADO</span>}
+        <div className="recibo-papel__marca">
+          <img
+            className="recibo-papel__logo"
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt=""
+            onError={(e) => { e.currentTarget.style.display = 'none' }}
+          />
+          <div>
+            <h1>{recibo.empresa}</h1>
+            {recibo.empresaLema && <p className="recibo-papel__lema">{recibo.empresaLema}</p>}
+          </div>
+        </div>
+        <div className="recibo-papel__meta">
+          <h2>Recibo de pago</h2>
+          <strong className="recibo-papel__numero">N.º {recibo.numero}</strong>
+          <p className="recibo-papel__fecha"><b>Fecha:</b> {formatoFechaHora(recibo.fecha)}</p>
+          {recibo.estado === 'Anulado' && <span className="recibo-papel__anulado">ANULADO</span>}
+        </div>
       </header>
 
-      <dl className="recibo-papel__datos">
-        <div><dt>Fecha</dt><dd>{formatoFechaHora(recibo.fecha)}</dd></div>
-        <div><dt>Cliente</dt><dd>{recibo.cliente}</dd></div>
-        <div><dt>Documento</dt><dd>{recibo.numeroDocumento}</dd></div>
-        <div><dt>Préstamo</dt><dd>{recibo.prestamoNumero} · {recibo.tipoPrestamo}</dd></div>
-        <div>
-          <dt>Tipo de pago</dt>
-          <dd>{NOMBRE_TIPO[recibo.tipoPago]}{recibo.modalidad ? ` (${recibo.modalidad.toLowerCase()})` : ''}</dd>
-        </div>
-      </dl>
+      <div className="recibo-papel__bloques">
+        <section>
+          <h3>Información del cliente</h3>
+          <dl className="recibo-papel__datos">
+            <div><dt>Nombre</dt><dd>{recibo.cliente}</dd></div>
+            <div><dt>Documento</dt><dd>{recibo.numeroDocumento}</dd></div>
+          </dl>
+        </section>
+        <section>
+          <h3>Detalle del préstamo</h3>
+          <dl className="recibo-papel__datos">
+            <div><dt>Préstamo</dt><dd>{recibo.prestamoNumero} · {recibo.tipoPrestamo}</dd></div>
+            <div>
+              <dt>Tipo de pago</dt>
+              <dd>{NOMBRE_TIPO[recibo.tipoPago]}{recibo.modalidad ? ` (${recibo.modalidad.toLowerCase()})` : ''}</dd>
+            </div>
+            <div><dt>Balance restante</dt><dd>{formatoMoneda(saldo)}</dd></div>
+          </dl>
+        </section>
+      </div>
 
       <table className="recibo-papel__tabla">
         <thead>
-          <tr><th>Concepto</th><th>Importe</th></tr>
+          <tr><th>Descripción</th><th>Total</th></tr>
         </thead>
         <tbody>
           {recibo.detalle.map((d, i) => {
@@ -51,19 +78,23 @@ export default function ReciboImprimible({ recibo, formato }) {
         </tbody>
       </table>
 
-      <dl className="recibo-papel__totales">
-        {componentes.map(([etiqueta, valor]) => (
-          <div key={etiqueta}><dt>{etiqueta}</dt><dd>{formatoMoneda(valor)}</dd></div>
-        ))}
-        <div className="recibo-papel__total"><dt>Total recibido</dt><dd>{formatoMoneda(recibo.monto)}</dd></div>
-        <div><dt>Balance (capital) posterior</dt><dd>{formatoMoneda(recibo.balancePosterior)}</dd></div>
-      </dl>
-
-      {recibo.observacion && <p className="recibo-papel__obs">Observación: {recibo.observacion}</p>}
+      <div className="recibo-papel__resumen">
+        <div className="recibo-papel__obs">
+          <strong>Observaciones:</strong>
+          <span>{recibo.observacion || '—'}</span>
+        </div>
+        <dl className="recibo-papel__totales">
+          {componentes.map(([etiqueta, valor]) => (
+            <div key={etiqueta}><dt>{etiqueta}</dt><dd>{formatoMoneda(valor)}</dd></div>
+          ))}
+          <div className="recibo-papel__total"><dt>Total pagado</dt><dd>{formatoMoneda(recibo.monto)}</dd></div>
+        </dl>
+      </div>
 
       <footer className="recibo-papel__pie">
+        <p className="recibo-papel__gracias">¡Gracias por su puntualidad y confianza!</p>
         <p>Atendido por: {recibo.cajero}</p>
-        <p>Gracias por su pago.</p>
+        <p>Comprobante de pago — {recibo.empresa}</p>
       </footer>
     </article>
   )
