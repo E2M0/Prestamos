@@ -129,6 +129,7 @@ final class PrestamoModel
     /** Actualiza capital pendiente, plazo y estado tras un recibo. */
     public function actualizarEstado(int $id, float $capitalPendiente, int $plazo, string $estado): void
     {
+         $plazo = max(1, $plazo);   // la tabla exige plazo > 0; un préstamo saldado por abono total queda con plazo 1
         Database::conexion()
             ->prepare('UPDATE prestamos SET capital_pendiente = ?, plazo = ?, estado = ? WHERE id = ?')
             ->execute([self::dinero($capitalPendiente), $plazo, $estado, $id]);

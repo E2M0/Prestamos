@@ -219,14 +219,26 @@ final class ClienteValidador
         }
     }
 
+    /** Referencias personales: opcionales (0 a 3). Una fila vacía se ignora; si se llena algo, nombre y teléfono son obligatorios. */
+    public static function referenciaVacia(array $r): bool
+    {
+        return self::limpiar($r['nombre'] ?? '') === '' && self::texto($r['telefono'] ?? '') === '';
+    }
+
     private function referencias(mixed $lista, array &$e): void
     {
-        if (!is_array($lista) || count($lista) !== 3) {
-            $e['referencias'] = 'Registre exactamente tres referencias personales.';
+        if ($lista === null) {
+            return;
+        }
+        if (!is_array($lista) || count($lista) > 3) {
+            $e['referencias'] = 'Se permiten como máximo tres referencias personales.';
             return;
         }
         foreach (array_values($lista) as $i => $r) {
             $r = is_array($r) ? $r : [];
+            if (self::referenciaVacia($r)) {
+                continue;
+            }
             $this->cadena($r, 'nombre', "referencias.$i.nombre", 2, 100, 'Ingrese el nombre.', $e);
             if (!preg_match(self::PATRON_TELEFONO, self::texto($r['telefono'] ?? ''))) {
                 $e["referencias.$i.telefono"] = 'Use el formato 809-000-0000.';

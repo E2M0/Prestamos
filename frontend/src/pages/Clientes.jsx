@@ -13,6 +13,7 @@ import CampoSelect from '../components/CampoSelect'
 import Cargando from '../components/Cargando'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Etiqueta from '../components/Etiqueta'
+import Pestanas, { PanelPestana } from '../components/Pestanas'
 import ModalConsulta from '../components/ModalConsulta'
 import SeccionForm from '../components/SeccionForm'
 import CamposLaborales from '../components/clientes/CamposLaborales'
@@ -45,6 +46,24 @@ const FILTROS = [
   },
 ]
 
+// Pestañas del formulario (cada una agrupa secciones que se siguen numerando como en el enunciado).
+const PESTANAS = [
+  { id: 'general', titulo: 'Datos generales' },
+  { id: 'contacto', titulo: 'Teléfonos y crédito' },
+  { id: 'garante', titulo: 'Garante' },
+  { id: 'laboral', titulo: 'Datos laborales' },
+  { id: 'extras', titulo: 'Familiares y referencias' },
+]
+
+// A qué pestaña pertenece un campo con error, según el nombre de su clave.
+function pestanaDeError(clave) {
+  if (clave.startsWith('garante')) return 'garante'
+  if (clave.startsWith('laboral')) return 'laboral'
+  if (clave.startsWith('familiares') || clave.startsWith('referencias')) return 'extras'
+  if (clave.startsWith('telefonos') || clave === 'limiteCredito' || clave === 'clasificacion') return 'contacto'
+  return 'general'
+}
+
 const enfocarPrimerError = () =>
   setTimeout(() => {
     const campo = document.querySelector('[aria-invalid="true"]')
@@ -75,12 +94,22 @@ function FormularioClientes({ catalogos }) {
   const [consultaAbierta, setConsultaAbierta] = useState(false)
   const [confirmarEstado, setConfirmarEstado] = useState(false)
   const [cambiandoEstado, setCambiandoEstado] = useState(false)
+  const [pestana, setPestana] = useState('general')
 
   const esEdicion = Boolean(form.id)
   const tipoDocumento = catalogos.tiposDocumento.find((t) => t.id === Number(form.tipoDocumentoId))
   const cambiar = (parcial) => setForm((f) => ({ ...f, ...parcial }))
 
+  // Muestra la pestaña con el primer error (en el orden de las pestañas) y enfoca ese campo.
+  function mostrarErrores(lista) {
+    const conError = new Set(Object.keys(lista).map(pestanaDeError))
+    const primera = PESTANAS.find((p) => conError.has(p.id))
+    if (primera) setPestana(primera.id)
+    enfocarPrimerError()
+  }
+
   function nuevo() {
+    setPestana('general')
     setForm(clienteVacio())
     setErrores({})
     setMensaje(null)
@@ -90,6 +119,7 @@ function FormularioClientes({ catalogos }) {
     setConsultaAbierta(false)
     setMensaje(null)
     setErrores({})
+    setPestana('general')
     setCargandoFicha(true)
     try {
       setForm(clienteDeDetalle(await obtenerCliente(fila.id)))
@@ -130,8 +160,8 @@ function FormularioClientes({ catalogos }) {
     const nuevos = validarCliente(form, catalogos)
     setErrores(nuevos)
     if (Object.keys(nuevos).length) {
-      setMensaje({ tipo: 'error', texto: 'Revise los campos marcados en rojo.' })
-      enfocarPrimerError()
+      setMensaje({ tipo: 'error', texto: 'Revise los campos marcados en rojo (las pestañas con un punto rojo).' })
+      mostrarErrores(nuevos)
       return
     }
 
@@ -144,7 +174,7 @@ function FormularioClientes({ catalogos }) {
     } catch (e) {
       setErrores(e.errores || {})
       setMensaje({ tipo: 'error', texto: e.message })
-      if (Object.keys(e.errores || {}).length) enfocarPrimerError()
+      if (Object.keys(e.errores || {}).length) mostrarErrores(e.errores)
     } finally {
       setGuardando(false)
     }
@@ -195,6 +225,13 @@ function FormularioClientes({ catalogos }) {
             {esEdicion && <Etiqueta estado={form.estado} />}
           </div>
 
+          <Pestanas
+            pestanas={PESTANAS.map((p) => ({ ...p, conError: Object.keys(errores).some((k) => pestanaDeError(k) === p.id) }))}
+            activa={pestana}
+            onCambio={setPestana}
+          />
+
+          <PanelPestana id="general" activa={pestana}>
           <SeccionForm titulo="1. Datos generales">
             <CamposPersona
               prefijoId="cliente"
@@ -210,6 +247,9 @@ function FormularioClientes({ catalogos }) {
             <CamposDireccion prefijoId="cliente" valor={form} onCambio={cambiar} errores={errores} />
           </SeccionForm>
 
+          </PanelPestana>
+
+          <PanelPestana id="contacto" activa={pestana}>
           <SeccionForm titulo="3. Teléfonos" descripcion="Uno o varios; marque uno como principal.">
             <EditorTelefonos
               prefijoId="cliente"
@@ -243,6 +283,9 @@ function FormularioClientes({ catalogos }) {
             </div>
           </SeccionForm>
 
+          </PanelPestana>
+
+          <PanelPestana id="garante" activa={pestana}>
           <SeccionGarante
             garante={form.garante}
             onCambio={(garante) => cambiar({ garante })}
@@ -251,6 +294,9 @@ function FormularioClientes({ catalogos }) {
             documentoCliente={form.numeroDocumento}
           />
 
+          </PanelPestana>
+
+          <PanelPestana id="extras" activa={pestana}>
           <SeccionForm titulo="6. Familiares (opcional)" descripcion="Un familiar cercano y uno que no viva con el cliente.">
             <BloqueFamiliar
               clave="cercano"
@@ -268,6 +314,13 @@ function FormularioClientes({ catalogos }) {
             />
           </SeccionForm>
 
+
+          <SeccionForm titulo="8. Referencias personales (opcional)" descripcion="Hasta tres referencias, cada una con nombre y teléfono.">
+            <ListaReferencias referencias={form.referencias} onCambio={(referencias) => cambiar({ referencias })} errores={errores} />
+          </SeccionForm>
+          </PanelPestana>
+
+          <PanelPestana id="laboral" activa={pestana}>
           <SeccionForm titulo="7. Datos laborales">
             <CamposLaborales
               prefijoId="cliente"
@@ -277,9 +330,7 @@ function FormularioClientes({ catalogos }) {
             />
           </SeccionForm>
 
-          <SeccionForm titulo="8. Referencias personales" descripcion="Tres referencias, cada una con nombre y teléfono.">
-            <ListaReferencias referencias={form.referencias} onCambio={(referencias) => cambiar({ referencias })} errores={errores} />
-          </SeccionForm>
+          </PanelPestana>
         </>
       )}
 

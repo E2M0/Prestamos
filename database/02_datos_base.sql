@@ -39,17 +39,18 @@ INSERT INTO nacionalidades (nombre) VALUES
 /* --- Tipos de plazo ---
    dias_periodo : se usa en i = tasa * dias_periodo / 30
    meses_periodo: si es mayor que 0 las fechas avanzan por meses de calendario
-   permite_excluir_fines_semana: solo el plazo Diario                       */
-INSERT INTO tipos_plazo (nombre, dias_periodo, meses_periodo, permite_excluir_fines_semana) VALUES
- (N'Diario',       1,   0,  1),
- (N'Interdiario',  2,   0,  0),
- (N'Semanal',      7,   0,  0),
- (N'Intersemanal', 14,  0,  0),
- (N'Quincenal',    15,  0,  0),
- (N'Mensual',      30,  1,  0),
- (N'Trimestral',   90,  3,  0),
- (N'Semestral',    180, 6,  0),
- (N'Anual',        360, 12, 0);
+   permite_excluir_fines_semana: solo el plazo Diario
+   plazo_minimo / plazo_maximo: rango de cuotas permitido con ese plazo (se cambia con UPDATE)  */
+INSERT INTO tipos_plazo (nombre, dias_periodo, meses_periodo, plazo_minimo, plazo_maximo, permite_excluir_fines_semana) VALUES
+ (N'Diario',       1,   0,  15, 365, 1),
+ (N'Interdiario',  2,   0,  10, 180, 0),
+ (N'Semanal',      7,   0,  4, 156, 0),
+ (N'Intersemanal', 14,  0,  2, 130, 0),
+ (N'Quincenal',    15,  0,  2, 120, 0),
+ (N'Mensual',      30,  1,  1, 120, 0),
+ (N'Trimestral',   90,  3,  1, 40, 0),
+ (N'Semestral',    180, 6,  1, 20, 0),
+ (N'Anual',        360, 12, 1, 15, 0);
 
 /* --- Tipos de amortización --- */
 INSERT INTO tipos_amortizacion (codigo, nombre) VALUES

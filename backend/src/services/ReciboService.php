@@ -219,6 +219,7 @@ final class ReciboService
             'correo'          => $r['correo'],
             'cajero'          => $r['cajero'],
             'empresa'         => (string) Configuracion::obtener('empresa.nombre', 'Sistema de Gestión de Préstamos'),
+            'empresaLema'     => (string) Configuracion::obtener('empresa.lema', ''),
             'detalle'         => array_map(fn(array $d) => [
                 'cuotaNumero' => $d['numero_cuota'] === null ? null : (int) $d['numero_cuota'],
                 'fechaPago'   => $d['fecha_pago'] === null ? null : substr((string) $d['fecha_pago'], 0, 10),

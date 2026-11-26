@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { Landmark, Lock, UserRound } from 'lucide-react'
+import { Lock, UserRound } from 'lucide-react'
 import useAutenticacion from '../hooks/useAutenticacion'
+import useEmpresa from '../hooks/useEmpresa'
+import LogoEmpresa from '../components/LogoEmpresa'
 import Alerta from '../components/Alerta'
 import Boton from '../components/Boton'
 import Campo from '../components/Campo'
@@ -9,6 +11,7 @@ import '../styles/login.css'
 
 export default function Login() {
   const { usuario, iniciarSesion } = useAutenticacion()
+  const empresa = useEmpresa()
   const ubicacion = useLocation()
   const [nombreUsuario, setNombreUsuario] = useState('')
   const [clave, setClave] = useState('')
@@ -43,8 +46,9 @@ export default function Login() {
     <main className="login">
       <section className="login__tarjeta">
         <div className="login__marca">
-          <div className="login__logo"><Landmark size={26} /></div>
-          <h1>Gestión de Préstamos</h1>
+          <div className="login__logo"><LogoEmpresa tamano={120} archivos={['logo-login.png', 'logo.png']} /></div>
+          <h1>{empresa.nombre}</h1>
+          {empresa.lema && <p className="login__lema">{empresa.lema}</p>}
           <p>Inicie sesión para continuar</p>
         </div>
 

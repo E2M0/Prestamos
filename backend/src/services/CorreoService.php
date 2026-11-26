@@ -64,7 +64,8 @@ final class CorreoService
         }
         $t .= $fila('Total recibido', $m($r['monto'])) . $fila('Balance posterior', $m($r['balancePosterior']));
 
-        return '<div style="font-family:Arial,sans-serif;max-width:480px"><h2 style="color:#047857">' . $h($r['empresa']) . '</h2>'
+        return '<div style="font-family:Arial,sans-serif;max-width:480px"><h2 style="color:#047857;margin-bottom:0">' . $h($r['empresa']) . '</h2>'
+             . ($r['empresaLema'] !== '' ? '<p style="margin:2px 0 12px;color:#c59b27;font-size:12px;font-weight:bold;letter-spacing:1px;text-transform:uppercase">' . $h($r['empresaLema']) . '</p>' : '')
              . '<table style="width:100%;border-collapse:collapse;font-size:14px">' . $t . '</table>'
              . '<p style="color:#777;font-size:12px">Atendido por ' . $h($r['cajero']) . '. Gracias por su pago.</p></div>';
     }

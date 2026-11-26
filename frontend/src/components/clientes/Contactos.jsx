@@ -21,7 +21,7 @@ export function BloqueFamiliar({ clave, titulo, valor, onCambio, errores }) {
   )
 }
 
-// Tres referencias personales (obligatorias): nombre y teléfono.
+// Hasta tres referencias personales (opcionales): nombre y teléfono; si llena una, debe completarla.
 export function ListaReferencias({ referencias, onCambio, errores }) {
   const cambiar = (i, parcial) => onCambio(referencias.map((r, k) => (k === i ? { ...r, ...parcial } : r)))
   return (

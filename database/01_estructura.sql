@@ -227,10 +227,13 @@ CREATE TABLE tipos_plazo (
     nombre                        NVARCHAR(30) NOT NULL,
     dias_periodo                  SMALLINT     NOT NULL,   -- para convertir la tasa: i = tasa * dias/30
     meses_periodo                 TINYINT      NOT NULL,   -- >0: las fechas avanzan por meses calendario
+    plazo_minimo                  SMALLINT     NOT NULL CONSTRAINT df_tipos_plazo_min DEFAULT 1,
+    plazo_maximo                  SMALLINT     NOT NULL,
     permite_excluir_fines_semana  BIT          NOT NULL CONSTRAINT df_tipos_plazo_excluir DEFAULT 0,
     CONSTRAINT pk_tipos_plazo PRIMARY KEY (id),
     CONSTRAINT uq_tipos_plazo_nombre UNIQUE (nombre),
-    CONSTRAINT ck_tipos_plazo_dias CHECK (dias_periodo > 0)
+    CONSTRAINT ck_tipos_plazo_dias CHECK (dias_periodo > 0),
+    CONSTRAINT ck_tipos_plazo_rango CHECK (plazo_minimo >= 1 AND plazo_maximo >= plazo_minimo)
 );
 
 CREATE TABLE tipos_amortizacion (

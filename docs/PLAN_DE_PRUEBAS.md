@@ -39,7 +39,7 @@ Marque cada caso cuando lo ejecute (`✔` pasó, `✘` falló + nota). Se recomi
 
 | # | Módulo | Pasos | Resultado esperado | Resultado |
 |---|---|---|---|---|
-| M1 | Clientes | Registrar cliente con 3 referencias | Se guarda y aparece en la lista | |
+| M1 | Clientes | Registrar cliente con 3 referencias, y otro sin referencias ni familiares | Ambos se guardan; una referencia a medias se rechaza | |
 | M2 | Clientes | Registrar con cédula inválida | Error claro en el campo; no se guarda | |
 | M3 | Clientes | Garante con documento existente | Datos cargados automáticamente, sin duplicar | |
 | M4 | Clientes | Inactivar y volver a activar | Cambia de estado; no se elimina | |

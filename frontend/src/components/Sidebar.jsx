@@ -1,21 +1,25 @@
 import { NavLink } from 'react-router-dom'
-import { Landmark } from 'lucide-react'
-import { NAVEGACION } from '../utils/navegacion'
+import { NAVEGACION, puedeVer } from '../utils/navegacion'
+import useAutenticacion from '../hooks/useAutenticacion'
+import useEmpresa from '../hooks/useEmpresa'
+import LogoEmpresa from './LogoEmpresa'
 
 export default function Sidebar({ abierto, onCerrar }) {
+  const { usuario } = useAutenticacion()
+  const empresa = useEmpresa()
   return (
     <>
       <aside className={`sidebar${abierto ? ' sidebar--abierto' : ''}`}>
         <div className="sidebar__marca">
-          <Landmark size={24} />
+          <LogoEmpresa tamano={40} />
           <div>
-            <strong>Préstamos</strong>
-            <span>Sistema administrativo</span>
+            <strong>{empresa.nombre}</strong>
+            {empresa.lema && <span>{empresa.lema}</span>}
           </div>
         </div>
 
         <nav className="sidebar__nav" aria-label="Navegación principal">
-          {NAVEGACION.map(({ ruta, titulo, icono: Icono }) => (
+          {NAVEGACION.filter((n) => puedeVer(n, usuario)).map(({ ruta, titulo, icono: Icono }) => (
             <NavLink
               key={ruta}
               to={ruta}
@@ -29,7 +33,7 @@ export default function Sidebar({ abierto, onCerrar }) {
           ))}
         </nav>
 
-        <p className="sidebar__pie">Sistema de Gestión de Préstamos</p>
+     
       </aside>
       {abierto && <div className="sidebar__fondo" onClick={onCerrar} aria-hidden="true" />}
     </>

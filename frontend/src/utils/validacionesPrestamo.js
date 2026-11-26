@@ -43,8 +43,13 @@ export function validarApertura(f, cat, credito, { omitirLimite = false } = {}) 
 
   if (!cat.tiposPrestamo.some((t) => t.id === Number(f.tipoPrestamoId))) e.tipoPrestamoId = 'Seleccione el tipo de préstamo.'
 
+  const reglas = cat.reglas ?? {}   // reglas de negocio que envía el servidor (tabla reglas_negocio)
+  const pct = (v) => String(Number(v))
   const monto = numero(f.monto)
   if (monto === null || !(monto > 0) || monto > MAX_DECIMAL) e.monto = 'Ingrese un monto mayor que cero.'
+  else if (reglas.monto_minimo !== undefined && monto < reglas.monto_minimo) {
+    e.monto = `El monto mínimo de un préstamo es ${formatoMoneda(reglas.monto_minimo)}.`
+  }
   else if (!omitirLimite && credito && monto > credito.disponible) {
     e.monto = `El monto supera el límite disponible (${formatoMoneda(credito.disponible)}).`
   }
@@ -56,8 +61,15 @@ export function validarApertura(f, cat, credito, { omitirLimite = false } = {}) 
 
   const tasa = numero(f.tasa)
   if (tasa === null || tasa < 0 || tasa > MAX_TASA) e.tasa = `Ingrese una tasa mensual entre 0 y ${MAX_TASA}.`
+  else if ((reglas.tasa_minima !== undefined && tasa < reglas.tasa_minima) || (reglas.tasa_maxima !== undefined && tasa > reglas.tasa_maxima)) {
+    e.tasa = `La tasa mensual debe estar entre ${pct(reglas.tasa_minima ?? 0)} % y ${pct(reglas.tasa_maxima ?? MAX_TASA)} %.`
+  }
 
-  if (!cat.tiposPlazo.some((p) => p.id === Number(f.tipoPlazoId))) e.tipoPlazoId = 'Seleccione el tipo de plazo.'
+  const tipoPlazo = cat.tiposPlazo.find((p) => p.id === Number(f.tipoPlazoId))
+  if (!tipoPlazo) e.tipoPlazoId = 'Seleccione el tipo de plazo.'
+  else if (!e.plazo && (plazo < tipoPlazo.plazoMinimo || plazo > tipoPlazo.plazoMaximo)) {
+    e.plazo = `El plazo ${tipoPlazo.nombre} permite de ${tipoPlazo.plazoMinimo} a ${tipoPlazo.plazoMaximo} cuotas.`
+  }
   if (!cat.tiposAmortizacion.some((a) => a.id === Number(f.tipoAmortizacionId))) {
     e.tipoAmortizacionId = 'Seleccione el tipo de amortización.'
   }
@@ -65,14 +77,28 @@ export function validarApertura(f, cat, credito, { omitirLimite = false } = {}) 
   const mora = numero(f.valorMora)
   if (mora === null || mora < 0 || mora > MAX_DECIMAL) e.valorMora = 'Ingrese el valor de la mora (0 o mayor).'
   else if (f.tipoMora === 'Porcentaje' && mora > 100) e.valorMora = 'El porcentaje no puede pasar de 100.'
+  else if (f.tipoMora === 'Porcentaje' && reglas.mora_porcentaje_maxima !== undefined && mora > reglas.mora_porcentaje_maxima) {
+    e.valorMora = `La mora no puede pasar de ${pct(reglas.mora_porcentaje_maxima)} % de la cuota.`
+  } else if (f.tipoMora === 'Monto' && monto > 0 && reglas.mora_fija_maxima_pct !== undefined && mora > (monto * reglas.mora_fija_maxima_pct) / 100) {
+    e.valorMora = `La mora fija no puede pasar de ${formatoMoneda((monto * reglas.mora_fija_maxima_pct) / 100)} (${pct(reglas.mora_fija_maxima_pct)} % del monto).`
+  }
 
   const seguro = numero(f.seguroMonto)
   if (seguro === null || seguro < 0 || seguro > MAX_DECIMAL) e.seguroMonto = 'Ingrese el monto del seguro (0 si no aplica).'
+  else if (monto > 0 && Number.isInteger(plazo) && plazo > 0 && reglas.seguro_total_maximo_pct !== undefined) {
+    const seguroTotal = f.seguroTipo === 'Fijo' ? seguro * plazo : seguro   // 'Fijo' es por cuota; 'Repartido' ya es el total
+    const tope = (monto * reglas.seguro_total_maximo_pct) / 100
+    if (seguroTotal > tope) {
+      e.seguroMonto = `El seguro total (${formatoMoneda(seguroTotal)}) no puede pasar de ${pct(reglas.seguro_total_maximo_pct)} % del monto (${formatoMoneda(tope)}).`
+    }
+  }
 
   const gasto = numero(f.gastoCierre)
   if (gasto === null || gasto < 0 || gasto > MAX_DECIMAL) e.gastoCierre = 'Ingrese el gasto de cierre (0 si no aplica).'
   else if (!f.gastoFinanciado && monto !== null && gasto >= monto) {
     e.gastoCierre = 'El gasto de cierre debe ser menor que el monto para que quede desembolso.'
+  } else if (monto > 0 && reglas.gasto_cierre_maximo_pct !== undefined && gasto > (monto * reglas.gasto_cierre_maximo_pct) / 100) {
+    e.gastoCierre = `El gasto de cierre no puede pasar de ${pct(reglas.gasto_cierre_maximo_pct)} % del monto (${formatoMoneda((monto * reglas.gasto_cierre_maximo_pct) / 100)}).`
   }
 
   if (!esFechaReal(f.fechaApertura)) e.fechaApertura = 'Ingrese una fecha de apertura válida.'

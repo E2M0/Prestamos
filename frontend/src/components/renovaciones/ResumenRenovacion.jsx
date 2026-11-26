@@ -8,7 +8,7 @@ export default function ResumenRenovacion({ renovacion }) {
       <div className="tabla__contenedor">
         <table className="tabla">
           <thead>
-            <tr><th>Préstamo</th><th>Base de saldo</th><th>Saldo a cancelar</th><th>Descuento (condonado)</th></tr>
+            <tr><th>Préstamo</th><th>Base de saldo</th><th className="tabla__numero">Saldo a cancelar</th><th className="tabla__numero">Descuento (condonado)</th></tr>
           </thead>
           <tbody>
             {renovacion.prestamos.map((p) => (
