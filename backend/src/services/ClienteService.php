@@ -33,6 +33,13 @@ final class ClienteService
             ], $this->catalogos->nacionalidades()),
             'estadosCiviles' => ClienteValidador::ESTADOS_CIVILES,
             'clasificaciones' => ClienteValidador::CLASIFICACIONES,
+            'limitesCredito' => [
+                'minimo' => ClienteValidador::LIMITE_MINIMO,
+                'maximo' => ClienteValidador::LIMITE_MAXIMO,
+                'tramos' => array_map(fn(string $c, array $t) => [
+                    'clasificacion' => $c, 'nombre' => $t['nombre'], 'desde' => $t['desde'], 'hasta' => $t['hasta'],
+                ], array_keys(ClienteValidador::TRAMOS_CREDITO), ClienteValidador::TRAMOS_CREDITO),
+            ],
             'tiposTelefono'  => ClienteValidador::TIPOS_TELEFONO,
         ];
     }
@@ -135,6 +142,11 @@ final class ClienteService
         $nacionalidades = [];
         foreach ($this->catalogos->nacionalidades() as $n) {
             $nacionalidades[(int) $n['id']] = true;
+        }
+
+        // Clasificación vacía: se asigna según el límite de crédito indicado.
+        if (ClienteValidador::texto($d['clasificacion'] ?? '') === '' && is_numeric($d['limiteCredito'] ?? null)) {
+            $d['clasificacion'] = ClienteValidador::clasificacionPara((float) $d['limiteCredito']) ?? '';
         }
 
         $validador = new ClienteValidador($tipos, $nacionalidades);

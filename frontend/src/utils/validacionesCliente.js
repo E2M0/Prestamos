@@ -1,6 +1,7 @@
 // Validaciones del formulario de clientes. Repiten las del servidor (ClienteValidador.php):
 // el usuario ve los errores al instante, pero el servidor siempre vuelve a validar.
 // Las claves de error usan notación de puntos, igual que el servidor.
+import { erroresCredito } from './creditoCliente'
 import { PATRON_TELEFONO, soloAlfanumerico, validarDocumento } from './documento'
 
 const PATRON_NOMBRE = /^[\p{L}][\p{L} .'-]{1,99}$/u
@@ -92,11 +93,7 @@ export function validarPersona(p, cat, pre = '') {
 export function validarCliente(form, cat) {
   const e = validarPersona(form, cat)
 
-  const limite = numero(form.limiteCredito)
-  if (limite === null || limite < 0 || limite > MAX_DECIMAL) {
-    e.limiteCredito = 'Ingrese un límite de crédito válido (0 o mayor).'
-  }
-  if (!cat.clasificaciones.includes(form.clasificacion)) e.clasificacion = 'Seleccione la clasificación del cliente.'
+  Object.assign(e, erroresCredito(form.limiteCredito, form.clasificacion))
 
   // Referencias: opcionales; una fila vacía se ignora y, si se llena algo, nombre y teléfono son obligatorios
   form.referencias.forEach((r, i) => {

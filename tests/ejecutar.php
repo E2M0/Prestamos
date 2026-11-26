@@ -15,6 +15,7 @@ $suites = [
     'Límite de cuotas por tipo de plazo' => __DIR__ . '/limites_plazo.php',
     'Reglas de negocio' => __DIR__ . '/reglas_negocio.php',
     'Referencias personales opcionales' => __DIR__ . '/referencias_opcionales.php',
+    'Crédito de clientes (límite y clasificación)' => __DIR__ . '/credito_clientes.php',
 ];
 
 $inicio = microtime(true);
