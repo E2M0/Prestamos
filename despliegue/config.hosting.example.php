@@ -18,7 +18,8 @@ return [
         'origenes' => [],   // página y API comparten dominio: no hace falta CORS
     ],
     'empresa' => [
-        'nombre' => 'Sistema de Gestión de Préstamos',   // aparece en el recibo impreso
+        'nombre' => 'Sistema de Gestión de Préstamos',   // aparece en el recibo, el login y el menú
+        'lema'   => '',                                  // línea bajo el nombre (opcional), ej.: 'Créditos & Préstamos'
     ],
     // Envío de recibos por correo (PHPMailer en backend/lib/PHPMailer/src). Con 'activo' => false el envío se desactiva.
     'correo' => [
