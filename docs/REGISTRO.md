@@ -13,7 +13,7 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | 5 | Clientes y garantes | Probado |
 | 6 | Tipos de préstamo y formulario de apertura | Entregado (probada solo en parte por el usuario) |
 | 7 | Cálculos de amortización, tabla virtual y guardado del préstamo | Probado |
-| 8 | Recibos de ingreso | Probado (correo sin probar: falta configurar SMTP) |
+| 8 | Recibos de ingreso | Probado (el correo se probó en el hosting con SMTP de Gmail) |
 | 9 | Renovación de préstamos | Entregado (falta tu prueba) |
 | 10 | Pruebas, documentación y presentación | Entregado (falta tu revisión) |
 
@@ -44,7 +44,7 @@ Estados: **Probado** = verificado por ejecución · **Entregado** = código entr
 | Mora una vez por cuota, guardada y sincronizada (consulta, cobro y dashboard) | Entregado (lógica probada; SQL Server sin probar) |
 | Recibos: consulta de préstamo, vista previa, cobro en transacción, historial | Entregado (falta tu prueba) |
 | Recibo imprimible A4 / POS 80 mm, compartir, copiar resumen | Entregado (falta tu prueba en navegador) |
-| Envío del recibo por correo (PHPMailer + SMTP) | Entregado, **no probado** (requiere configurar SMTP) |
+| Envío del recibo por correo (PHPMailer + SMTP) | Entregado y probado en el hosting con SMTP de Gmail (requiere configurar SMTP) |
 | Renovación: selección de 1 a 3 préstamos del cliente y base de saldo (capital / a la fecha / general) | Entregado (falta tu prueba) |
 | Renovación: saldos, descuento y desembolso final calculados en PHP | Entregado (cálculo probado con 7.200 planes simulados: sin errores; SQL Server sin probar) |
 | Renovación: recibos de cancelación, préstamos anteriores «Renovado» y préstamo nuevo en una transacción | Entregado (falta tu prueba con SQL Server) |
