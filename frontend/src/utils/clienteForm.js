@@ -1,3 +1,5 @@
+import { LIMITE_INICIAL } from './creditoCliente'
+
 // Estado del formulario de clientes: valores iniciales y conversión desde/hacia la API.
 
 export const laboralVacio = () => ({
@@ -27,8 +29,8 @@ export const garanteVacio = () => ({ ...personaVacia(), existente: false, actual
 
 export const clienteVacio = () => ({
   ...personaVacia(),
-  limiteCredito: '',
-  clasificacion: '',
+  limiteCredito: LIMITE_INICIAL,
+  clasificacion: 'C',
   estado: 'Activo',
   familiares: { cercano: contactoVacio(), noConvive: contactoVacio() },
   referencias: [0, 1, 2].map(() => ({ nombre: '', telefono: '' })),

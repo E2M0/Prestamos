@@ -1,20 +1,38 @@
+/* =====================================================================
+   SISTEMA DE GESTIÓN DE PRÉSTAMOS  -  03_datos_prueba.sql
+   Ruta en el proyecto: database/mysql/03_datos_prueba.sql (MySQL / MariaDB)
+   Ejecutar DESPUÉS de 01_estructura.sql y 02_datos_base.sql.
+
+   Datos FICTICIOS para pruebas: 14 personas (11 clientes y 3 garantes),
+   9 préstamos en distintos estados y sus recibos.
+   Los cálculos de cuotas siguen las fórmulas del enunciado
+   (tasa mensual nominal, i = tasa * dias_periodo / 30) y el último ajuste
+   de redondeo se aplica a la última cuota.
+   Fecha de referencia de los datos: 2026-11-16.
+
+   Casos cubiertos:
+     PR-000001 Insoluto mensual, una cuota vencida con mora (y mora pagada aparte)
+     PR-000002 Absoluto quincenal, una cuota Parcial y otra Vencida
+     PR-000003 Saldado
+     PR-000004 Renovado -> PR-000005 (renovación con balance general)
+     PR-000006 Diario sin sábados ni domingos
+     PR-000007 Saldo fijo (solo se han generado las cuotas ya saldadas y la siguiente)
+     PR-000008 Trimestral con seguro repartido y gasto de cierre financiado
+     PR-000009 Anual con seguro fijo, cuotas todas pendientes
+   ===================================================================== */
 SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
 START TRANSACTION;
 
 INSERT INTO clientes (id, tipo_documento_id, numero_documento, nombres, apellidos, nacionalidad_id, fecha_nacimiento, estado_civil, correo, direccion, referencia_direccion, es_cliente, limite_credito, clasificacion, estado, usuario_creacion_id) VALUES
-(1, 1, '402-1000001-1', 'María Altagracia', 'Pérez Rodríguez', 1, '1985-03-14', 'Casado/a', 'maria.perez1@example.com', 'Av. Estrella Sadhalá #13, Los Jardines, Santiago de los Caballeros', 'Cerca del colmado', 1, 200000, 'A', 'Activo', 1),
-(2, 1, '402-1000002-2', 'José Luis', 'Martínez Gómez', 1, '1979-07-22', 'Casado/a', 'jose.martinez2@example.com', 'Calle del Sol #16, Bella Vista, Santiago de los Caballeros', 'Cerca de la escuela', 1, 50000, 'A', 'Activo', 1),
+(1, 1, '402-1000001-1', 'María Altagracia', 'Pérez Rodríguez', 1, '1985-03-14', 'Casado/a', 'maria.perez1@example.com', 'Av. Estrella Sadhalá #13, Los Jardines, Santiago de los Caballeros', 'Cerca del colmado', 1, 200000, 'B', 'Activo', 1),
+(2, 1, '402-1000002-2', 'José Luis', 'Martínez Gómez', 1, '1979-07-22', 'Casado/a', 'jose.martinez2@example.com', 'Calle del Sol #16, Bella Vista, Santiago de los Caballeros', 'Cerca de la escuela', 1, 50000, 'C', 'Activo', 1),
 (3, 1, '402-1000003-3', 'Ana Karina', 'Santos Núñez', 1, '1990-11-05', 'Soltero/a', 'ana.santos3@example.com', 'Av. Juan Pablo Duarte #19, Cienfuegos, Santiago de los Caballeros', 'Cerca de la farmacia', 1, 120000, 'B', 'Activo', 1),
-(4, 1, '402-1000004-4', 'Carlos Manuel', 'Ramírez Peña', 1, '1988-01-30', 'Unión libre', 'carlos.ramirez4@example.com', 'Calle 27 de Febrero #22, Reparto Peralta, Santiago de los Caballeros', 'Cerca del parque', 1, 60000, 'B', 'Activo', 1),
-(5, 1, '402-1000005-5', 'Luisa Fernanda', 'Díaz Almonte', 1, '1983-09-18', 'Divorciado/a', 'luisa.diaz5@example.com', 'Calle Restauración #25, Pekín, Santiago de los Caballeros', 'Cerca de la estación', 1, 80000, 'A', 'Activo', 1),
+(4, 1, '402-1000004-4', 'Carlos Manuel', 'Ramírez Peña', 1, '1988-01-30', 'Unión libre', 'carlos.ramirez4@example.com', 'Calle 27 de Febrero #22, Reparto Peralta, Santiago de los Caballeros', 'Cerca del parque', 1, 60000, 'C', 'Activo', 1),
+(5, 1, '402-1000005-5', 'Luisa Fernanda', 'Díaz Almonte', 1, '1983-09-18', 'Divorciado/a', 'luisa.diaz5@example.com', 'Calle Restauración #25, Pekín, Santiago de los Caballeros', 'Cerca de la estación', 1, 80000, 'C', 'Activo', 1),
 (6, 1, '402-1000006-6', 'Pedro Antonio', 'Castillo Reyes', 1, '1992-05-09', 'Soltero/a', 'pedro.castillo6@example.com', 'Av. Imbert #28, La Trinitaria, Santiago de los Caballeros', 'Cerca de la iglesia', 1, 30000, 'C', 'Activo', 1),
-(7, 3, 'VE4821907', 'Yolanda Beatriz', 'Rojas Méndez', 3, '1987-12-02', 'Casado/a', 'yolanda.rojas7@example.com', 'Calle Mella #31, Villa Olga, Santiago de los Caballeros', 'Cerca del colmado', 1, 100000, 'B', 'Activo', 1),
-(8, 1, '402-1000008-8', 'Rafael Enrique', 'Jiménez Cruz', 1, '1975-04-27', 'Casado/a', 'rafael.jimenez8@example.com', 'Calle Duarte #34, Gurabo, Santiago de los Caballeros', 'Cerca de la escuela', 1, 150000, 'A', 'Activo', 1),
-(9, 1, '402-1000009-9', 'Daniela Esther', 'Vargas Polanco', 1, '1995-08-16', 'Soltero/a', 'daniela.vargas9@example.com', 'Av. Estrella Sadhalá #37, Los Salados, Santiago de los Caballeros', 'Cerca de la farmacia', 1, 300000, 'A', 'Activo', 1),
+(7, 3, 'VE4821907', 'Yolanda Beatriz', 'Rojas Méndez', 3, '1987-12-02', 'Casado/a', 'yolanda.rojas7@example.com', 'Calle Mella #31, Villa Olga, Santiago de los Caballeros', 'Cerca del colmado', 1, 100000, 'C', 'Activo', 1),
+(8, 1, '402-1000008-8', 'Rafael Enrique', 'Jiménez Cruz', 1, '1975-04-27', 'Casado/a', 'rafael.jimenez8@example.com', 'Calle Duarte #34, Gurabo, Santiago de los Caballeros', 'Cerca de la escuela', 1, 150000, 'B', 'Activo', 1),
+(9, 1, '402-1000009-9', 'Daniela Esther', 'Vargas Polanco', 1, '1995-08-16', 'Soltero/a', 'daniela.vargas9@example.com', 'Av. Estrella Sadhalá #37, Los Salados, Santiago de los Caballeros', 'Cerca de la farmacia', 1, 300000, 'B', 'Activo', 1),
 (10, 1, '402-1000010-0', 'Miguel Ángel', 'Herrera Ortiz', 1, '1981-02-11', 'Casado/a', 'miguel.herrera10@example.com', 'Calle del Sol #40, Baracoa, Santiago de los Caballeros', 'Cerca del parque', 1, 40000, 'C', 'Activo', 1),
 (11, 1, '402-1000011-1', 'Sandra Milagros', 'Fermín Taveras', 1, '1989-10-23', 'Soltero/a', 'sandra.fermin11@example.com', 'Av. Juan Pablo Duarte #43, Cerros de Gurabo, Santiago de los Caballeros', 'Cerca de la estación', 1, 25000, 'C', 'Inactivo', 1),
 (12, 1, '402-1000012-2', 'Juan Carlos', 'Mejía Báez', 1, '1970-06-06', 'Casado/a', 'juan.mejia12@example.com', 'Calle 27 de Febrero #46, El Embrujo, Santiago de los Caballeros', 'Cerca de la iglesia', 0, 0, NULL, 'Activo', 1),
@@ -22,21 +40,45 @@ INSERT INTO clientes (id, tipo_documento_id, numero_documento, nombres, apellido
 (14, 1, '402-1000014-4', 'Francisco Javier', 'Lora Abreu', 1, '1968-03-03', 'Casado/a', 'francisco.lora14@example.com', 'Av. Imbert #52, Rafey, Santiago de los Caballeros', 'Cerca de la escuela', 0, 0, NULL, 'Activo', 1);
 
 INSERT INTO clientes_telefonos (cliente_id, tipo, numero, principal) VALUES
-(1, 'Celular', '809-555-0101', 1), (2, 'Celular', '809-555-0102', 1), (2, 'Casa', '809-555-0202', 0),
-(3, 'Celular', '809-555-0103', 1), (3, 'Trabajo', '809-555-0303', 0), (4, 'Celular', '809-555-0104', 1),
-(4, 'Casa', '809-555-0204', 0), (5, 'Celular', '809-555-0105', 1), (6, 'Celular', '809-555-0106', 1),
-(6, 'Casa', '809-555-0206', 0), (6, 'Trabajo', '809-555-0306', 0), (7, 'Celular', '809-555-0107', 1),
-(8, 'Celular', '809-555-0108', 1), (8, 'Casa', '809-555-0208', 0), (9, 'Celular', '809-555-0109', 1),
-(9, 'Trabajo', '809-555-0309', 0), (10, 'Celular', '809-555-0110', 1), (10, 'Casa', '809-555-0210', 0),
-(11, 'Celular', '809-555-0111', 1), (12, 'Celular', '809-555-0112', 1), (12, 'Casa', '809-555-0212', 0),
-(12, 'Trabajo', '809-555-0312', 0), (13, 'Celular', '809-555-0113', 1), (14, 'Celular', '809-555-0114', 1),
+(1, 'Celular', '809-555-0101', 1),
+(2, 'Celular', '809-555-0102', 1),
+(2, 'Casa', '809-555-0202', 0),
+(3, 'Celular', '809-555-0103', 1),
+(3, 'Trabajo', '809-555-0303', 0),
+(4, 'Celular', '809-555-0104', 1),
+(4, 'Casa', '809-555-0204', 0),
+(5, 'Celular', '809-555-0105', 1),
+(6, 'Celular', '809-555-0106', 1),
+(6, 'Casa', '809-555-0206', 0),
+(6, 'Trabajo', '809-555-0306', 0),
+(7, 'Celular', '809-555-0107', 1),
+(8, 'Celular', '809-555-0108', 1),
+(8, 'Casa', '809-555-0208', 0),
+(9, 'Celular', '809-555-0109', 1),
+(9, 'Trabajo', '809-555-0309', 0),
+(10, 'Celular', '809-555-0110', 1),
+(10, 'Casa', '809-555-0210', 0),
+(11, 'Celular', '809-555-0111', 1),
+(12, 'Celular', '809-555-0112', 1),
+(12, 'Casa', '809-555-0212', 0),
+(12, 'Trabajo', '809-555-0312', 0),
+(13, 'Celular', '809-555-0113', 1),
+(14, 'Celular', '809-555-0114', 1),
 (14, 'Casa', '809-555-0214', 0);
 
 INSERT INTO clientes_garantes (cliente_id, garante_id, fecha_asignacion, vigente, usuario_creacion_id) VALUES
-(1, 2, '2026-04-20', 1, 1), (2, 12, '2026-01-03', 1, 1), (3, 12, '2026-08-25', 1, 1),
-(4, 14, '2025-06-10', 0, 1), (4, 13, '2026-02-01', 1, 1), (5, 14, '2026-09-20', 1, 1),
-(6, 1, '2026-10-15', 1, 1), (7, 3, '2026-07-30', 1, 1), (8, 4, '2026-05-28', 1, 1),
-(9, 13, '2026-02-25', 1, 1), (10, 5, '2026-03-12', 1, 1), (11, 6, '2026-06-18', 1, 1);
+(1, 2, '2026-04-20', 1, 1),
+(2, 12, '2026-01-03', 1, 1),
+(3, 12, '2026-08-25', 1, 1),
+(4, 14, '2025-06-10', 0, 1),
+(4, 13, '2026-02-01', 1, 1),
+(5, 14, '2026-09-20', 1, 1),
+(6, 1, '2026-10-15', 1, 1),
+(7, 3, '2026-07-30', 1, 1),
+(8, 4, '2026-05-28', 1, 1),
+(9, 13, '2026-02-25', 1, 1),
+(10, 5, '2026-03-12', 1, 1),
+(11, 6, '2026-06-18', 1, 1);
 
 INSERT INTO clientes_familiares (cliente_id, tipo, nombre, parentesco, telefono, direccion) VALUES
 (1, 'Cercano', 'Familiar Cercano 1', 'Madre', '809-555-0401', 'Misma dirección del cliente'),
@@ -69,28 +111,50 @@ INSERT INTO clientes_laborales (cliente_id, empresa, cargo_ocupacion, tiempo_lab
 (14, 'Panadería La Espiga', 'Panadero', '6 años', 74000, '809-555-0614', 'Zona industrial #14, Santiago');
 
 INSERT INTO clientes_referencias (cliente_id, nombre, telefono) VALUES
-(1, 'Referencia 1 de cliente 1', '809-555-0704'), (1, 'Referencia 2 de cliente 1', '809-555-0705'), (1, 'Referencia 3 de cliente 1', '809-555-0706'),
-(2, 'Referencia 1 de cliente 2', '809-555-0707'), (2, 'Referencia 2 de cliente 2', '809-555-0708'), (2, 'Referencia 3 de cliente 2', '809-555-0709'),
-(3, 'Referencia 1 de cliente 3', '809-555-0710'), (3, 'Referencia 2 de cliente 3', '809-555-0711'), (3, 'Referencia 3 de cliente 3', '809-555-0712'),
-(4, 'Referencia 1 de cliente 4', '809-555-0713'), (4, 'Referencia 2 de cliente 4', '809-555-0714'), (4, 'Referencia 3 de cliente 4', '809-555-0715'),
-(5, 'Referencia 1 de cliente 5', '809-555-0716'), (5, 'Referencia 2 de cliente 5', '809-555-0717'), (5, 'Referencia 3 de cliente 5', '809-555-0718'),
-(6, 'Referencia 1 de cliente 6', '809-555-0719'), (6, 'Referencia 2 de cliente 6', '809-555-0720'), (6, 'Referencia 3 de cliente 6', '809-555-0721'),
-(7, 'Referencia 1 de cliente 7', '809-555-0722'), (7, 'Referencia 2 de cliente 7', '809-555-0723'), (7, 'Referencia 3 de cliente 7', '809-555-0724'),
-(8, 'Referencia 1 de cliente 8', '809-555-0725'), (8, 'Referencia 2 de cliente 8', '809-555-0726'), (8, 'Referencia 3 de cliente 8', '809-555-0727'),
-(9, 'Referencia 1 de cliente 9', '809-555-0728'), (9, 'Referencia 2 de cliente 9', '809-555-0729'), (9, 'Referencia 3 de cliente 9', '809-555-0730'),
-(10, 'Referencia 1 de cliente 10', '809-555-0731'), (10, 'Referencia 2 de cliente 10', '809-555-0732'), (10, 'Referencia 3 de cliente 10', '809-555-0733'),
-(11, 'Referencia 1 de cliente 11', '809-555-0734'), (11, 'Referencia 2 de cliente 11', '809-555-0735'), (11, 'Referencia 3 de cliente 11', '809-555-0736');
+(1, 'Referencia 1 de cliente 1', '809-555-0704'),
+(1, 'Referencia 2 de cliente 1', '809-555-0705'),
+(1, 'Referencia 3 de cliente 1', '809-555-0706'),
+(2, 'Referencia 1 de cliente 2', '809-555-0707'),
+(2, 'Referencia 2 de cliente 2', '809-555-0708'),
+(2, 'Referencia 3 de cliente 2', '809-555-0709'),
+(3, 'Referencia 1 de cliente 3', '809-555-0710'),
+(3, 'Referencia 2 de cliente 3', '809-555-0711'),
+(3, 'Referencia 3 de cliente 3', '809-555-0712'),
+(4, 'Referencia 1 de cliente 4', '809-555-0713'),
+(4, 'Referencia 2 de cliente 4', '809-555-0714'),
+(4, 'Referencia 3 de cliente 4', '809-555-0715'),
+(5, 'Referencia 1 de cliente 5', '809-555-0716'),
+(5, 'Referencia 2 de cliente 5', '809-555-0717'),
+(5, 'Referencia 3 de cliente 5', '809-555-0718'),
+(6, 'Referencia 1 de cliente 6', '809-555-0719'),
+(6, 'Referencia 2 de cliente 6', '809-555-0720'),
+(6, 'Referencia 3 de cliente 6', '809-555-0721'),
+(7, 'Referencia 1 de cliente 7', '809-555-0722'),
+(7, 'Referencia 2 de cliente 7', '809-555-0723'),
+(7, 'Referencia 3 de cliente 7', '809-555-0724'),
+(8, 'Referencia 1 de cliente 8', '809-555-0725'),
+(8, 'Referencia 2 de cliente 8', '809-555-0726'),
+(8, 'Referencia 3 de cliente 8', '809-555-0727'),
+(9, 'Referencia 1 de cliente 9', '809-555-0728'),
+(9, 'Referencia 2 de cliente 9', '809-555-0729'),
+(9, 'Referencia 3 de cliente 9', '809-555-0730'),
+(10, 'Referencia 1 de cliente 10', '809-555-0731'),
+(10, 'Referencia 2 de cliente 10', '809-555-0732'),
+(10, 'Referencia 3 de cliente 10', '809-555-0733'),
+(11, 'Referencia 1 de cliente 11', '809-555-0734'),
+(11, 'Referencia 2 de cliente 11', '809-555-0735'),
+(11, 'Referencia 3 de cliente 11', '809-555-0736');
 
 INSERT INTO prestamos (id, numero, cliente_id, tipo_prestamo_id, monto, plazo, tasa, tipo_plazo_id, tipo_amortizacion_id, incluye_sabado, incluye_domingo, tipo_mora, valor_mora, seguro_tipo, seguro_monto, gasto_cierre, gasto_cierre_financiado, desembolso, fecha_apertura, fecha_primer_pago, capital_pendiente, estado, usuario_creacion_id, fecha_creacion) VALUES
-(1, 'PR-000001', 1, 1, 100000, 12, 3.0, 6, 2, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 2000, 0, 98000, '2026-05-10', '2026-06-10', 62590.72, 'Activo', 1, '2026-05-10 09:00:00'),
-(2, 'PR-000002', 3, 3, 50000, 10, 4.0, 5, 1, 1, 1, 'Monto', 150, 'Fijo', 0, 0, 0, 50000, '2026-09-01', '2026-09-16', 33150.00, 'Activo', 1, '2026-09-01 09:00:00'),
-(3, 'PR-000003', 2, 1, 30000, 6, 2.5, 6, 1, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 0, 0, 30000, '2026-01-05', '2026-02-05', 0.00, 'Saldado', 1, '2026-01-05 09:00:00'),
-(4, 'PR-000004', 5, 2, 20000, 8, 4.0, 3, 2, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 0, 0, 20000, '2026-09-28', '2026-10-05', 0.00, 'Renovado', 1, '2026-09-28 09:00:00'),
-(5, 'PR-000005', 5, 2, 25000, 6, 3.5, 6, 2, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 1500, 0, 23500, '2026-10-20', '2026-11-20', 25000, 'Activo', 1, '2026-10-20 09:00:00'),
-(6, 'PR-000006', 6, 1, 10000, 20, 5.0, 1, 1, 0, 0, 'Monto', 25, 'Fijo', 0, 0, 0, 10000, '2026-10-26', '2026-10-27', 4000.00, 'Activo', 1, '2026-10-26 09:00:00'),
-(7, 'PR-000007', 7, 3, 60000, 12, 3.0, 6, 3, 1, 1, 'Porcentaje', 3, 'Fijo', 0, 0, 0, 60000, '2026-08-05', '2026-09-05', 50000.00, 'Activo', 1, '2026-08-05 09:00:00'),
-(8, 'PR-000008', 8, 3, 80000, 4, 2.0, 7, 1, 1, 1, 'Porcentaje', 5, 'Repartido', 2000, 1600, 1, 80000, '2026-06-01', '2026-09-01', 60000.00, 'Activo', 1, '2026-06-01 09:00:00'),
-(9, 'PR-000009', 9, 3, 150000, 3, 1.5, 9, 1, 1, 1, 'Porcentaje', 5, 'Fijo', 500, 3000, 0, 147000, '2026-03-01', '2027-03-01', 150000, 'Activo', 1, '2026-03-01 09:00:00');
+(1, 'PR-000001', 1, 1, 100000, 12, 3.0, 6, 2, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 2000, 0, 98000, '2026-05-10', '2026-06-10', 62590.72, 'Activo', 1, '2026-05-10T09:00:00'),
+(2, 'PR-000002', 3, 3, 50000, 10, 4.0, 5, 1, 1, 1, 'Monto', 150, 'Fijo', 0, 0, 0, 50000, '2026-09-01', '2026-09-16', 33150.00, 'Activo', 1, '2026-09-01T09:00:00'),
+(3, 'PR-000003', 2, 1, 30000, 6, 2.5, 6, 1, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 0, 0, 30000, '2026-01-05', '2026-02-05', 0.00, 'Saldado', 1, '2026-01-05T09:00:00'),
+(4, 'PR-000004', 5, 2, 20000, 8, 4.0, 3, 2, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 0, 0, 20000, '2026-09-28', '2026-10-05', 0.00, 'Renovado', 1, '2026-09-28T09:00:00'),
+(5, 'PR-000005', 5, 2, 25000, 6, 3.5, 6, 2, 1, 1, 'Porcentaje', 5, 'Fijo', 0, 1500, 0, 23500, '2026-10-20', '2026-11-20', 25000, 'Activo', 1, '2026-10-20T09:00:00'),
+(6, 'PR-000006', 6, 1, 10000, 20, 5.0, 1, 1, 0, 0, 'Monto', 25, 'Fijo', 0, 0, 0, 10000, '2026-10-26', '2026-10-27', 4000.00, 'Activo', 1, '2026-10-26T09:00:00'),
+(7, 'PR-000007', 7, 3, 60000, 12, 3.0, 6, 3, 1, 1, 'Porcentaje', 3, 'Fijo', 0, 0, 0, 60000, '2026-08-05', '2026-09-05', 50000.00, 'Activo', 1, '2026-08-05T09:00:00'),
+(8, 'PR-000008', 8, 3, 80000, 4, 2.0, 7, 1, 1, 1, 'Porcentaje', 5, 'Repartido', 2000, 1600, 1, 80000, '2026-06-01', '2026-09-01', 60000.00, 'Activo', 1, '2026-06-01T09:00:00'),
+(9, 'PR-000009', 9, 3, 150000, 3, 1.5, 9, 1, 1, 1, 'Porcentaje', 5, 'Fijo', 500, 3000, 0, 147000, '2026-03-01', '2027-03-01', 150000, 'Activo', 1, '2026-03-01T09:00:00');
 
 INSERT INTO prestamos_cuotas (id, prestamo_id, numero_cuota, fecha_pago, capital, interes, seguro, gasto_cierre, mora_acumulada, valor_cuota, capital_pagado, interes_pagado, seguro_pagado, gasto_cierre_pagado, mora_pagada, balance, estado) VALUES
 (1, 1, 1, '2026-06-10', 7046.21, 3000.00, 0.00, 0.00, 502.31, 10046.21, 7046.21, 3000.00, 0.00, 0.00, 502.31, 92953.79, 'Pagada'),
@@ -167,74 +231,117 @@ INSERT INTO prestamos_cuotas (id, prestamo_id, numero_cuota, fecha_pago, capital
 (72, 9, 3, '2029-03-01', 50000.00, 27000.00, 500.00, 0.00, 0, 77500.00, 0, 0, 0, 0, 0, 0.00, 'Pendiente');
 
 INSERT INTO recibos_ingreso (id, numero, prestamo_id, fecha, tipo_pago, monto_recibido, total_mora, total_interes, total_seguro, total_gasto_cierre, total_capital, balance_posterior, formato_impreso, estado, observacion, usuario_creacion_id, fecha_creacion) VALUES
-(1, 'RC-000001', 3, '2026-02-05 10:16:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 25000.00, 'POS80', 'Activo', NULL, 2, '2026-02-05 10:16:00'),
-(2, 'RC-000002', 3, '2026-03-05 10:17:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 20000.00, 'A4', 'Activo', NULL, 2, '2026-03-05 10:17:00'),
-(3, 'RC-000003', 3, '2026-04-05 10:18:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 15000.00, 'POS80', 'Activo', NULL, 2, '2026-04-05 10:18:00'),
-(4, 'RC-000004', 3, '2026-05-05 10:19:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 10000.00, 'A4', 'Activo', NULL, 2, '2026-05-05 10:19:00'),
-(5, 'RC-000005', 3, '2026-06-05 10:20:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 5000.00, 'POS80', 'Activo', NULL, 2, '2026-06-05 10:20:00'),
-(6, 'RC-000006', 1, '2026-06-10 10:16:00', 'normal', 10548.52, 502.31, 3000.00, 0.00, 0.00, 7046.21, 92953.79, 'A4', 'Activo', NULL, 2, '2026-06-10 10:16:00'),
-(7, 'RC-000007', 3, '2026-07-05 10:21:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 0.00, 'POS80', 'Activo', NULL, 2, '2026-07-05 10:21:00'),
-(8, 'RC-000008', 1, '2026-07-10 10:17:00', 'normal', 10548.52, 502.31, 2788.61, 0.00, 0.00, 7257.60, 85696.19, 'A4', 'Activo', NULL, 2, '2026-07-10 10:17:00'),
-(9, 'RC-000009', 1, '2026-08-10 10:18:00', 'normal', 10548.52, 502.31, 2570.89, 0.00, 0.00, 7475.32, 78220.87, 'POS80', 'Activo', NULL, 2, '2026-08-10 10:18:00'),
-(10, 'RC-000010', 8, '2026-09-01 10:16:00', 'normal', 26985.00, 1285.00, 4800.00, 500.00, 400.00, 20000.00, 60000.00, 'A4', 'Activo', NULL, 2, '2026-09-01 10:16:00'),
-(11, 'RC-000011', 7, '2026-09-05 10:16:00', 'normal', 7004.00, 204.00, 1800.00, 0.00, 0.00, 5000.00, 55000.00, 'POS80', 'Activo', NULL, 2, '2026-09-05 10:16:00'),
-(12, 'RC-000012', 1, '2026-09-10 10:19:00', 'normal', 10548.52, 502.31, 2346.63, 0.00, 0.00, 7699.58, 70521.29, 'A4', 'Activo', NULL, 2, '2026-09-10 10:19:00'),
-(13, 'RC-000013', 2, '2026-09-16 10:16:00', 'normal', 6150.00, 150, 1000.00, 0.00, 0.00, 5000.00, 45000.00, 'POS80', 'Activo', NULL, 2, '2026-09-16 10:16:00'),
-(14, 'RC-000014', 2, '2026-10-01 10:17:00', 'normal', 6150.00, 150, 1000.00, 0.00, 0.00, 5000.00, 40000.00, 'A4', 'Activo', NULL, 2, '2026-10-01 10:17:00'),
-(15, 'RC-000015', 4, '2026-10-05 10:16:00', 'normal', 2736.45, 130.31, 186.67, 0.00, 0.00, 2419.47, 17580.53, 'POS80', 'Activo', NULL, 2, '2026-10-05 10:16:00'),
-(16, 'RC-000016', 7, '2026-10-05 10:17:00', 'normal', 6849.50, 199.50, 1650.00, 0.00, 0.00, 5000.00, 50000.00, 'A4', 'Activo', NULL, 2, '2026-10-05 10:17:00'),
-(17, 'RC-000017', 1, '2026-10-10 10:20:00', 'normal', 10548.52, 502.31, 2115.64, 0.00, 0.00, 7930.57, 62590.72, 'POS80', 'Activo', NULL, 2, '2026-10-10 10:20:00'),
-(18, 'RC-000018', 4, '2026-10-12 10:17:00', 'normal', 2736.45, 130.31, 164.08, 0.00, 0.00, 2442.06, 15138.47, 'A4', 'Activo', NULL, 2, '2026-10-12 10:17:00'),
-(19, 'RC-000019', 2, '2026-10-16 10:18:00', 'normal', 6150.00, 150, 1000.00, 0.00, 0.00, 5000.00, 35000.00, 'POS80', 'Activo', NULL, 2, '2026-10-16 10:18:00'),
-(20, 'RC-000020', 4, '2026-10-19 10:18:00', 'normal', 2736.45, 130.31, 141.29, 0.00, 0.00, 2464.85, 12673.62, 'A4', 'Activo', NULL, 2, '2026-10-19 10:18:00'),
-(21, 'RC-000021', 4, '2026-10-20 10:00:00', 'normal', 13421.62, 390.93, 357.07, 0.00, 0.00, 12673.62, 0.00, 'POS80', 'Activo', 'Cancelación por renovación', 2, '2026-10-20 10:00:00'),
-(22, 'RC-000022', 6, '2026-10-27 09:16:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 9500.00, 'A4', 'Activo', NULL, 2, '2026-10-27 09:16:00'),
-(23, 'RC-000023', 6, '2026-10-28 09:17:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 9000.00, 'POS80', 'Activo', NULL, 2, '2026-10-28 09:17:00'),
-(24, 'RC-000024', 6, '2026-10-29 09:18:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 8500.00, 'A4', 'Activo', NULL, 2, '2026-10-29 09:18:00'),
-(25, 'RC-000025', 6, '2026-10-30 09:19:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 8000.00, 'POS80', 'Activo', NULL, 2, '2026-10-30 09:19:00'),
-(26, 'RC-000026', 6, '2026-11-02 09:20:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 7500.00, 'A4', 'Activo', NULL, 2, '2026-11-02 09:20:00'),
-(27, 'RC-000027', 2, '2026-11-02 11:05:00', 'normal', 3000.00, 150, 1000.00, 0.00, 0.00, 1850.00, 33150.00, 'POS80', 'Activo', 'Pago parcial de cuota', 2, '2026-11-02 11:05:00'),
-(28, 'RC-000028', 6, '2026-11-03 09:21:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 7000.00, 'A4', 'Activo', NULL, 2, '2026-11-03 09:21:00'),
-(29, 'RC-000029', 6, '2026-11-04 09:22:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 6500.00, 'POS80', 'Activo', NULL, 2, '2026-11-04 09:22:00'),
-(30, 'RC-000030', 6, '2026-11-05 09:23:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 6000.00, 'A4', 'Activo', NULL, 2, '2026-11-05 09:23:00'),
-(31, 'RC-000031', 6, '2026-11-06 09:24:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 5500.00, 'POS80', 'Activo', NULL, 2, '2026-11-06 09:24:00'),
-(32, 'RC-000032', 6, '2026-11-09 09:25:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 5000.00, 'A4', 'Activo', NULL, 2, '2026-11-09 09:25:00'),
-(33, 'RC-000033', 6, '2026-11-10 09:26:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 4500.00, 'POS80', 'Activo', NULL, 2, '2026-11-10 09:26:00'),
-(34, 'RC-000034', 6, '2026-11-11 09:27:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 4000.00, 'A4', 'Activo', NULL, 2, '2026-11-11 09:27:00'),
-(35, 'RC-000035', 1, '2026-11-15 16:40:00', 'solo_mora', 502.31, 502.31, 0, 0, 0, 0, 62590.72, 'POS80', 'Activo', 'Pago de mora acumulada', 2, '2026-11-15 16:40:00');
+(1, 'RC-000001', 3, '2026-02-05T10:16:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 25000.00, 'POS80', 'Activo', NULL, 2, '2026-02-05T10:16:00'),
+(2, 'RC-000002', 3, '2026-03-05T10:17:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 20000.00, 'A4', 'Activo', NULL, 2, '2026-03-05T10:17:00'),
+(3, 'RC-000003', 3, '2026-04-05T10:18:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 15000.00, 'POS80', 'Activo', NULL, 2, '2026-04-05T10:18:00'),
+(4, 'RC-000004', 3, '2026-05-05T10:19:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 10000.00, 'A4', 'Activo', NULL, 2, '2026-05-05T10:19:00'),
+(5, 'RC-000005', 3, '2026-06-05T10:20:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 5000.00, 'POS80', 'Activo', NULL, 2, '2026-06-05T10:20:00'),
+(6, 'RC-000006', 1, '2026-06-10T10:16:00', 'normal', 10548.52, 502.31, 3000.00, 0.00, 0.00, 7046.21, 92953.79, 'A4', 'Activo', NULL, 2, '2026-06-10T10:16:00'),
+(7, 'RC-000007', 3, '2026-07-05T10:21:00', 'normal', 6037.50, 287.50, 750.00, 0.00, 0.00, 5000.00, 0.00, 'POS80', 'Activo', NULL, 2, '2026-07-05T10:21:00'),
+(8, 'RC-000008', 1, '2026-07-10T10:17:00', 'normal', 10548.52, 502.31, 2788.61, 0.00, 0.00, 7257.60, 85696.19, 'A4', 'Activo', NULL, 2, '2026-07-10T10:17:00'),
+(9, 'RC-000009', 1, '2026-08-10T10:18:00', 'normal', 10548.52, 502.31, 2570.89, 0.00, 0.00, 7475.32, 78220.87, 'POS80', 'Activo', NULL, 2, '2026-08-10T10:18:00'),
+(10, 'RC-000010', 8, '2026-09-01T10:16:00', 'normal', 26985.00, 1285.00, 4800.00, 500.00, 400.00, 20000.00, 60000.00, 'A4', 'Activo', NULL, 2, '2026-09-01T10:16:00'),
+(11, 'RC-000011', 7, '2026-09-05T10:16:00', 'normal', 7004.00, 204.00, 1800.00, 0.00, 0.00, 5000.00, 55000.00, 'POS80', 'Activo', NULL, 2, '2026-09-05T10:16:00'),
+(12, 'RC-000012', 1, '2026-09-10T10:19:00', 'normal', 10548.52, 502.31, 2346.63, 0.00, 0.00, 7699.58, 70521.29, 'A4', 'Activo', NULL, 2, '2026-09-10T10:19:00'),
+(13, 'RC-000013', 2, '2026-09-16T10:16:00', 'normal', 6150.00, 150, 1000.00, 0.00, 0.00, 5000.00, 45000.00, 'POS80', 'Activo', NULL, 2, '2026-09-16T10:16:00'),
+(14, 'RC-000014', 2, '2026-10-01T10:17:00', 'normal', 6150.00, 150, 1000.00, 0.00, 0.00, 5000.00, 40000.00, 'A4', 'Activo', NULL, 2, '2026-10-01T10:17:00'),
+(15, 'RC-000015', 4, '2026-10-05T10:16:00', 'normal', 2736.45, 130.31, 186.67, 0.00, 0.00, 2419.47, 17580.53, 'POS80', 'Activo', NULL, 2, '2026-10-05T10:16:00'),
+(16, 'RC-000016', 7, '2026-10-05T10:17:00', 'normal', 6849.50, 199.50, 1650.00, 0.00, 0.00, 5000.00, 50000.00, 'A4', 'Activo', NULL, 2, '2026-10-05T10:17:00'),
+(17, 'RC-000017', 1, '2026-10-10T10:20:00', 'normal', 10548.52, 502.31, 2115.64, 0.00, 0.00, 7930.57, 62590.72, 'POS80', 'Activo', NULL, 2, '2026-10-10T10:20:00'),
+(18, 'RC-000018', 4, '2026-10-12T10:17:00', 'normal', 2736.45, 130.31, 164.08, 0.00, 0.00, 2442.06, 15138.47, 'A4', 'Activo', NULL, 2, '2026-10-12T10:17:00'),
+(19, 'RC-000019', 2, '2026-10-16T10:18:00', 'normal', 6150.00, 150, 1000.00, 0.00, 0.00, 5000.00, 35000.00, 'POS80', 'Activo', NULL, 2, '2026-10-16T10:18:00'),
+(20, 'RC-000020', 4, '2026-10-19T10:18:00', 'normal', 2736.45, 130.31, 141.29, 0.00, 0.00, 2464.85, 12673.62, 'A4', 'Activo', NULL, 2, '2026-10-19T10:18:00'),
+(21, 'RC-000021', 4, '2026-10-20T10:00:00', 'normal', 13421.62, 390.93, 357.07, 0.00, 0.00, 12673.62, 0.00, 'POS80', 'Activo', 'Cancelación por renovación', 2, '2026-10-20T10:00:00'),
+(22, 'RC-000022', 6, '2026-10-27T09:16:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 9500.00, 'A4', 'Activo', NULL, 2, '2026-10-27T09:16:00'),
+(23, 'RC-000023', 6, '2026-10-28T09:17:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 9000.00, 'POS80', 'Activo', NULL, 2, '2026-10-28T09:17:00'),
+(24, 'RC-000024', 6, '2026-10-29T09:18:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 8500.00, 'A4', 'Activo', NULL, 2, '2026-10-29T09:18:00'),
+(25, 'RC-000025', 6, '2026-10-30T09:19:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 8000.00, 'POS80', 'Activo', NULL, 2, '2026-10-30T09:19:00'),
+(26, 'RC-000026', 6, '2026-11-02T09:20:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 7500.00, 'A4', 'Activo', NULL, 2, '2026-11-02T09:20:00'),
+(27, 'RC-000027', 2, '2026-11-02T11:05:00', 'normal', 3000.00, 150, 1000.00, 0.00, 0.00, 1850.00, 33150.00, 'POS80', 'Activo', 'Pago parcial de cuota', 2, '2026-11-02T11:05:00'),
+(28, 'RC-000028', 6, '2026-11-03T09:21:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 7000.00, 'A4', 'Activo', NULL, 2, '2026-11-03T09:21:00'),
+(29, 'RC-000029', 6, '2026-11-04T09:22:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 6500.00, 'POS80', 'Activo', NULL, 2, '2026-11-04T09:22:00'),
+(30, 'RC-000030', 6, '2026-11-05T09:23:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 6000.00, 'A4', 'Activo', NULL, 2, '2026-11-05T09:23:00'),
+(31, 'RC-000031', 6, '2026-11-06T09:24:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 5500.00, 'POS80', 'Activo', NULL, 2, '2026-11-06T09:24:00'),
+(32, 'RC-000032', 6, '2026-11-09T09:25:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 5000.00, 'A4', 'Activo', NULL, 2, '2026-11-09T09:25:00'),
+(33, 'RC-000033', 6, '2026-11-10T09:26:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 4500.00, 'POS80', 'Activo', NULL, 2, '2026-11-10T09:26:00'),
+(34, 'RC-000034', 6, '2026-11-11T09:27:00', 'normal', 541.67, 25, 16.67, 0.00, 0.00, 500.00, 4000.00, 'A4', 'Activo', NULL, 2, '2026-11-11T09:27:00'),
+(35, 'RC-000035', 1, '2026-11-15T16:40:00', 'solo_mora', 502.31, 502.31, 0, 0, 0, 0, 62590.72, 'POS80', 'Activo', 'Pago de mora acumulada', 2, '2026-11-15T16:40:00');
 
 INSERT INTO recibos_ingreso_detalle (recibo_id, cuota_id, mora_aplicada, interes_aplicado, seguro_aplicado, gasto_cierre_aplicado, capital_aplicado) VALUES
-(1, 23, 287.50, 750.00, 0.00, 0.00, 5000.00), (2, 24, 287.50, 750.00, 0.00, 0.00, 5000.00),
-(3, 25, 287.50, 750.00, 0.00, 0.00, 5000.00), (4, 26, 287.50, 750.00, 0.00, 0.00, 5000.00),
-(5, 27, 287.50, 750.00, 0.00, 0.00, 5000.00), (6, 1, 502.31, 3000.00, 0.00, 0.00, 7046.21),
-(7, 28, 287.50, 750.00, 0.00, 0.00, 5000.00), (8, 2, 502.31, 2788.61, 0.00, 0.00, 7257.60),
-(9, 3, 502.31, 2570.89, 0.00, 0.00, 7475.32), (10, 66, 1285.00, 4800.00, 500.00, 400.00, 20000.00),
-(11, 63, 204.00, 1800.00, 0.00, 0.00, 5000.00), (12, 4, 502.31, 2346.63, 0.00, 0.00, 7699.58),
-(13, 13, 150, 1000.00, 0.00, 0.00, 5000.00), (14, 14, 150, 1000.00, 0.00, 0.00, 5000.00),
-(15, 29, 130.31, 186.67, 0.00, 0.00, 2419.47), (16, 64, 199.50, 1650.00, 0.00, 0.00, 5000.00),
-(17, 5, 502.31, 2115.64, 0.00, 0.00, 7930.57), (18, 30, 130.31, 164.08, 0.00, 0.00, 2442.06),
-(19, 15, 150, 1000.00, 0.00, 0.00, 5000.00), (20, 31, 130.31, 141.29, 0.00, 0.00, 2464.85),
-(21, 32, 130.31, 118.29, 0.00, 0.00, 2487.85), (21, 33, 130.31, 95.07, 0.00, 0.00, 2511.07),
-(21, 34, 130.31, 71.63, 0.00, 0.00, 2534.51), (21, 35, 0, 47.98, 0.00, 0.00, 2558.16),
-(21, 36, 0, 24.10, 0.00, 0.00, 2582.03), (22, 43, 25, 16.67, 0.00, 0.00, 500.00),
-(23, 44, 25, 16.67, 0.00, 0.00, 500.00), (24, 45, 25, 16.67, 0.00, 0.00, 500.00),
-(25, 46, 25, 16.67, 0.00, 0.00, 500.00), (26, 47, 25, 16.67, 0.00, 0.00, 500.00),
-(27, 16, 150, 1000.00, 0.00, 0.00, 1850.00), (28, 48, 25, 16.67, 0.00, 0.00, 500.00),
-(29, 49, 25, 16.67, 0.00, 0.00, 500.00), (30, 50, 25, 16.67, 0.00, 0.00, 500.00),
-(31, 51, 25, 16.67, 0.00, 0.00, 500.00), (32, 52, 25, 16.67, 0.00, 0.00, 500.00),
-(33, 53, 25, 16.67, 0.00, 0.00, 500.00), (34, 54, 25, 16.67, 0.00, 0.00, 500.00),
+(1, 23, 287.50, 750.00, 0.00, 0.00, 5000.00),
+(2, 24, 287.50, 750.00, 0.00, 0.00, 5000.00),
+(3, 25, 287.50, 750.00, 0.00, 0.00, 5000.00),
+(4, 26, 287.50, 750.00, 0.00, 0.00, 5000.00),
+(5, 27, 287.50, 750.00, 0.00, 0.00, 5000.00),
+(6, 1, 502.31, 3000.00, 0.00, 0.00, 7046.21),
+(7, 28, 287.50, 750.00, 0.00, 0.00, 5000.00),
+(8, 2, 502.31, 2788.61, 0.00, 0.00, 7257.60),
+(9, 3, 502.31, 2570.89, 0.00, 0.00, 7475.32),
+(10, 66, 1285.00, 4800.00, 500.00, 400.00, 20000.00),
+(11, 63, 204.00, 1800.00, 0.00, 0.00, 5000.00),
+(12, 4, 502.31, 2346.63, 0.00, 0.00, 7699.58),
+(13, 13, 150, 1000.00, 0.00, 0.00, 5000.00),
+(14, 14, 150, 1000.00, 0.00, 0.00, 5000.00),
+(15, 29, 130.31, 186.67, 0.00, 0.00, 2419.47),
+(16, 64, 199.50, 1650.00, 0.00, 0.00, 5000.00),
+(17, 5, 502.31, 2115.64, 0.00, 0.00, 7930.57),
+(18, 30, 130.31, 164.08, 0.00, 0.00, 2442.06),
+(19, 15, 150, 1000.00, 0.00, 0.00, 5000.00),
+(20, 31, 130.31, 141.29, 0.00, 0.00, 2464.85),
+(21, 32, 130.31, 118.29, 0.00, 0.00, 2487.85),
+(21, 33, 130.31, 95.07, 0.00, 0.00, 2511.07),
+(21, 34, 130.31, 71.63, 0.00, 0.00, 2534.51),
+(21, 35, 0, 47.98, 0.00, 0.00, 2558.16),
+(21, 36, 0, 24.10, 0.00, 0.00, 2582.03),
+(22, 43, 25, 16.67, 0.00, 0.00, 500.00),
+(23, 44, 25, 16.67, 0.00, 0.00, 500.00),
+(24, 45, 25, 16.67, 0.00, 0.00, 500.00),
+(25, 46, 25, 16.67, 0.00, 0.00, 500.00),
+(26, 47, 25, 16.67, 0.00, 0.00, 500.00),
+(27, 16, 150, 1000.00, 0.00, 0.00, 1850.00),
+(28, 48, 25, 16.67, 0.00, 0.00, 500.00),
+(29, 49, 25, 16.67, 0.00, 0.00, 500.00),
+(30, 50, 25, 16.67, 0.00, 0.00, 500.00),
+(31, 51, 25, 16.67, 0.00, 0.00, 500.00),
+(32, 52, 25, 16.67, 0.00, 0.00, 500.00),
+(33, 53, 25, 16.67, 0.00, 0.00, 500.00),
+(34, 54, 25, 16.67, 0.00, 0.00, 500.00),
 (35, 6, 502.31, 0, 0, 0, 0);
 
 INSERT INTO renovaciones (id, cliente_id, prestamo_nuevo_id, fecha, total_saldo_cancelado, desembolso_final, usuario_creacion_id) VALUES
-(1, 5, 5, '2026-10-20 10:00:00', 13421.62, 10078.38, 2);
+(1, 5, 5, '2026-10-20T10:00:00', 13421.62, 10078.38, 2);
 
 INSERT INTO renovaciones_detalle (renovacion_id, prestamo_anterior_id, base_saldo, monto_cancelado, descuento, recibo_id) VALUES
 (1, 4, 'Balance general', 13421.62, 0, 21);
 
-ALTER TABLE clientes AUTO_INCREMENT = 15;
-ALTER TABLE prestamos AUTO_INCREMENT = 10;
-ALTER TABLE prestamos_cuotas AUTO_INCREMENT = 73;
-ALTER TABLE recibos_ingreso AUTO_INCREMENT = 36;
-ALTER TABLE renovaciones AUTO_INCREMENT = 2;
+/* Los contadores continúan después de los números ya usados (último usado) */
+UPDATE secuencias SET valor = 9  WHERE nombre = 'prestamo';
+UPDATE secuencias SET valor = 35 WHERE nombre = 'recibo';
 
 COMMIT;
+
+/* ---------------------------------------------------------------------
+   Consultas de control (opcionales). Todas deben dar 0 filas en las dos
+   últimas y los conteos esperados en las primeras.
+   --------------------------------------------------------------------- */
+SELECT 'clientes' AS tabla, COUNT(*) AS filas FROM clientes WHERE es_cliente = 1
+UNION ALL SELECT 'personas', COUNT(*) FROM clientes
+UNION ALL SELECT 'prestamos', COUNT(*) FROM prestamos
+UNION ALL SELECT 'cuotas', COUNT(*) FROM prestamos_cuotas
+UNION ALL SELECT 'recibos', COUNT(*) FROM recibos_ingreso;
+
+SELECT estado, COUNT(*) AS prestamos FROM prestamos GROUP BY estado;
+
+-- capital_pendiente de la cabecera debe coincidir con monto - capital pagado en cuotas
+SELECT p.numero, p.capital_pendiente, p.monto - SUM(c.capital_pagado) AS esperado
+FROM prestamos p JOIN prestamos_cuotas c ON c.prestamo_id = p.id
+GROUP BY p.numero, p.capital_pendiente, p.monto
+HAVING p.capital_pendiente <> p.monto - SUM(c.capital_pagado);
+
+-- el detalle de cada recibo debe sumar lo mismo que su cabecera
+SELECT r.numero
+FROM recibos_ingreso r JOIN recibos_ingreso_detalle d ON d.recibo_id = r.id
+GROUP BY r.numero, r.total_mora, r.total_interes, r.total_seguro, r.total_gasto_cierre, r.total_capital
+HAVING SUM(d.mora_aplicada) <> r.total_mora OR SUM(d.interes_aplicado) <> r.total_interes
+    OR SUM(d.seguro_aplicado) <> r.total_seguro OR SUM(d.gasto_cierre_aplicado) <> r.total_gasto_cierre
+    OR SUM(d.capital_aplicado) <> r.total_capital;

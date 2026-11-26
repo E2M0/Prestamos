@@ -4,6 +4,7 @@ import useApi from '../hooks/useApi'
 import { obtenerCatalogosClientes } from '../services/catalogoService'
 import { buscarPersona, cambiarEstadoCliente, guardarCliente, listarClientes, obtenerCliente } from '../services/clienteService'
 import { aPayload, clienteDeDetalle, clienteVacio, personaDeDetalle } from '../utils/clienteForm'
+import { clasificacionPara, erroresCredito, etiquetaClasificacion, LIMITE_MAXIMO, LIMITE_MINIMO } from '../utils/creditoCliente'
 import { validarDocumento } from '../utils/documento'
 import { validarCliente } from '../utils/validacionesCliente'
 import Alerta from '../components/Alerta'
@@ -23,7 +24,6 @@ import EditorTelefonos from '../components/clientes/EditorTelefonos'
 import SeccionGarante from '../components/clientes/SeccionGarante'
 import '../styles/formularios.css'
 
-const ETIQUETA_CLASIFICACION = { A: 'A · Excelente', B: 'B · Bueno', C: 'C · Regular' }
 
 // Definidos fuera del componente para que ModalConsulta reciba referencias estables.
 const cargarClientes = (filtros) => listarClientes({ ...filtros, rol: 'cliente' })
@@ -99,6 +99,17 @@ function FormularioClientes({ catalogos }) {
   const esEdicion = Boolean(form.id)
   const tipoDocumento = catalogos.tiposDocumento.find((t) => t.id === Number(form.tipoDocumentoId))
   const cambiar = (parcial) => setForm((f) => ({ ...f, ...parcial }))
+
+  // Al cambiar el límite se sugiere la clasificación que le corresponde (el usuario aún puede cambiarla).
+  function cambiarLimite(e) {
+    const limiteCredito = e.target.value
+    const sugerida = clasificacionPara(limiteCredito)
+    cambiar(sugerida ? { limiteCredito, clasificacion: sugerida } : { limiteCredito })
+  }
+
+  // Advertencia en vivo, antes de guardar: fuera de rango o clasificación que no corresponde al límite.
+  const erroresCreditoVivo = erroresCredito(form.limiteCredito, form.clasificacion)
+  const avisoCredito = erroresCreditoVivo.limiteCredito ?? erroresCreditoVivo.clasificacion ?? null
 
   // Muestra la pestaña con el primer error (en el orden de las pestañas) y enfoca ese campo.
   function mostrarErrores(lista) {
@@ -266,21 +277,23 @@ function FormularioClientes({ catalogos }) {
                 id="cliente-limiteCredito"
                 etiqueta="Límite de crédito (RD$)"
                 type="number"
-                min="0"
+                min={LIMITE_MINIMO}
+                max={LIMITE_MAXIMO}
                 step="0.01"
                 value={form.limiteCredito}
                 error={errores.limiteCredito}
-                onChange={(e) => cambiar({ limiteCredito: e.target.value })}
+                onChange={cambiarLimite}
               />
               <CampoSelect
                 id="cliente-clasificacion"
                 etiqueta="Clasificación"
                 value={form.clasificacion}
                 error={errores.clasificacion}
-                opciones={catalogos.clasificaciones.map((c) => ({ valor: c, etiqueta: ETIQUETA_CLASIFICACION[c] ?? c }))}
+                opciones={catalogos.clasificaciones.map((c) => ({ valor: c, etiqueta: etiquetaClasificacion(c) }))}
                 onChange={(e) => cambiar({ clasificacion: e.target.value })}
               />
             </div>
+            {avisoCredito && <Alerta tipo="error">{avisoCredito}</Alerta>}
           </SeccionForm>
 
           </PanelPestana>

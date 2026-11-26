@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS recibos_ingreso;
 DROP TABLE IF EXISTS prestamos_cuotas;
 DROP TABLE IF EXISTS prestamos;
 DROP TABLE IF EXISTS tipos_amortizacion;
+DROP TABLE IF EXISTS reglas_negocio;
 DROP TABLE IF EXISTS tipos_plazo;
 DROP TABLE IF EXISTS tipos_prestamo;
 DROP TABLE IF EXISTS clientes_referencias;
@@ -127,7 +128,14 @@ CREATE TABLE clientes (
         ('Soltero/a', 'Casado/a', 'Unión libre', 'Divorciado/a', 'Viudo/a')),
     CONSTRAINT ck_clientes_clasif  CHECK (clasificacion IS NULL OR clasificacion IN ('A', 'B', 'C')),
     CONSTRAINT ck_clientes_estado  CHECK (estado IN ('Activo', 'Inactivo')),
-    CONSTRAINT ck_clientes_limite  CHECK (limite_credito >= 0)
+    CONSTRAINT ck_clientes_limite  CHECK (limite_credito >= 0),
+    -- Crédito de los clientes (es_cliente = 1): límite entre 5,000 y 10,000,000 y clasificación acorde al límite.
+    -- C: hasta 100,000 | B: hasta 1,000,000 | A: hasta 10,000,000. Los garantes sin crédito (es_cliente = 0) no aplican.
+    CONSTRAINT ck_clientes_limite_rango CHECK (es_cliente = 0 OR (limite_credito >= 5000 AND limite_credito <= 10000000)),
+    CONSTRAINT ck_clientes_clasif_limite CHECK (es_cliente = 0 OR (
+        (clasificacion = 'C' AND limite_credito <= 100000)
+        OR (clasificacion = 'B' AND limite_credito > 100000 AND limite_credito <= 1000000)
+        OR (clasificacion = 'A' AND limite_credito > 1000000)))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE INDEX ix_clientes_nombre ON clientes (apellidos, nombres);
 
@@ -228,6 +236,15 @@ CREATE TABLE tipos_plazo (
     CONSTRAINT uq_tipos_plazo_nombre UNIQUE (nombre),
     CONSTRAINT ck_tipos_plazo_dias CHECK (dias_periodo > 0),
     CONSTRAINT ck_tipos_plazo_rango CHECK (plazo_minimo >= 1 AND plazo_maximo >= plazo_minimo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/* Reglas de negocio: límites que se validan al abrir un préstamo (se cambian con UPDATE, sin tocar el código) */
+CREATE TABLE reglas_negocio (
+    clave        VARCHAR(40)  NOT NULL,
+    valor        DECIMAL(12,4) NOT NULL,
+    descripcion  VARCHAR(200) NOT NULL,
+    CONSTRAINT pk_reglas_negocio PRIMARY KEY (clave),
+    CONSTRAINT ck_reglas_valor CHECK (valor >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE tipos_amortizacion (

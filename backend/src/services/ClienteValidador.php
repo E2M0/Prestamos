@@ -10,6 +10,16 @@ final class ClienteValidador
 {
     public const ESTADOS_CIVILES = ['Soltero/a', 'Casado/a', 'Unión libre', 'Divorciado/a', 'Viudo/a'];
     public const CLASIFICACIONES = ['A', 'B', 'C'];
+
+    // Límite de crédito: mínimo y máximo absolutos, y tramo que corresponde a cada clasificación.
+    // 'hasta' es el tope del tramo (incluido); el tramo siguiente empieza por encima de ese valor (acepta centavos).
+    public const LIMITE_MINIMO = 5000.0;
+    public const LIMITE_MAXIMO = 10000000.0;
+    public const TRAMOS_CREDITO = [
+        'C' => ['nombre' => 'Regular',   'desde' => 5000.0,    'hasta' => 100000.0],
+        'B' => ['nombre' => 'Bueno',     'desde' => 100001.0,  'hasta' => 1000000.0],
+        'A' => ['nombre' => 'Excelente', 'desde' => 1000001.0, 'hasta' => 10000000.0],
+    ];
     public const TIPOS_TELEFONO = ['Celular', 'Casa', 'Trabajo'];
     public const MAX_DECIMAL = 999999999999.99;
 
@@ -72,17 +82,40 @@ final class ClienteValidador
         return null;
     }
 
+    /** Clasificación que corresponde a un límite de crédito, o null si está fuera del rango permitido. */
+    public static function clasificacionPara(float $limite): ?string
+    {
+        if ($limite < self::LIMITE_MINIMO || $limite > self::LIMITE_MAXIMO) {
+            return null;
+        }
+        if ($limite <= self::TRAMOS_CREDITO['C']['hasta']) {
+            return 'C';
+        }
+        return $limite <= self::TRAMOS_CREDITO['B']['hasta'] ? 'B' : 'A';
+    }
+
+    private static function pesos(float $v): string
+    {
+        return 'RD$ ' . number_format($v, 2);
+    }
+
     // ------------------------------------------------------------ cliente completo
     public function cliente(array $d): array
     {
         $e = $this->persona($d, '');
 
         $limite = $this->numero($d['limiteCredito'] ?? null);
-        if ($limite === null || $limite < 0 || $limite > self::MAX_DECIMAL) {
-            $e['limiteCredito'] = 'Ingrese un límite de crédito válido (0 o mayor).';
+        $clasificacion = $d['clasificacion'] ?? '';
+        $correspondiente = $limite === null ? null : self::clasificacionPara($limite);
+        if ($correspondiente === null) {
+            $e['limiteCredito'] = 'El límite de crédito debe estar entre ' . self::pesos(self::LIMITE_MINIMO) . ' y ' . self::pesos(self::LIMITE_MAXIMO) . '.';
         }
-        if (!in_array($d['clasificacion'] ?? '', self::CLASIFICACIONES, true)) {
-            $e['clasificacion'] = 'Seleccione la clasificación del cliente.';
+        if (!in_array($clasificacion, self::CLASIFICACIONES, true)) {
+            $e['clasificacion'] = 'Seleccione la clasificación del cliente (A, B o C).';
+        } elseif ($correspondiente !== null && $clasificacion !== $correspondiente) {
+            $t = self::TRAMOS_CREDITO[$clasificacion];
+            $e['clasificacion'] = 'La clasificación ' . $clasificacion . ' (' . $t['nombre'] . ') admite límites de ' . self::pesos($t['desde'])
+                . ' a ' . self::pesos($t['hasta']) . '. Con ' . self::pesos($limite) . ' corresponde la clasificación ' . $correspondiente . '.';
         }
 
         $this->referencias($d['referencias'] ?? null, $e);
